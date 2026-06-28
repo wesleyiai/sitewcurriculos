@@ -768,6 +768,117 @@ footer{background:var(--azul);color:rgba(255,255,255,.5);padding:56px 32px 32px;
   .radio-grid { grid-template-columns: 1fr 1fr; }
 }
 
+
+/* ══ PARTÍCULAS ══ */
+#particles-canvas {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+}
+.hero-content { position: relative; z-index: 2; }
+
+/* ══ TYPEWRITER ══ */
+.typewriter-wrap { display: inline; }
+.typewriter-text { color: inherit; }
+.typewriter-cursor {
+  display: inline-block; width: 3px; height: 0.85em;
+  background: var(--laranja2); margin-left: 2px;
+  vertical-align: middle; border-radius: 2px;
+  animation: cursorBlink 0.75s step-end infinite;
+}
+@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ══ CARD 3D TILT ══ */
+.plano {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.plano-inner-shine {
+  position: absolute; inset: 0; border-radius: 22px;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.08), transparent 60%);
+  pointer-events: none; transition: opacity .3s;
+  opacity: 0;
+}
+.plano:hover .plano-inner-shine { opacity: 1; }
+
+/* ══ GRADIENTE ANIMADO HERO ══ */
+.hero {
+  background-size: 400% 400% !important;
+  animation: gradientShift 12s ease infinite;
+}
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ══ SELO GIRATÓRIO ══ */
+.selo-giratório {
+  position: absolute; top: 32px; right: 32px;
+  width: 110px; height: 110px; z-index: 3;
+}
+.selo-svg { animation: rotateSelo 12s linear infinite; }
+.selo-center {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+}
+.selo-center .selo-icon { font-size: 1.6rem; }
+.selo-center .selo-sub { font-size: .48rem; color: var(--laranja2); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+@keyframes rotateSelo { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@media(max-width:640px){ .selo-giratório { width: 80px; height: 80px; top: 16px; right: 16px; } .selo-center .selo-icon { font-size: 1.1rem; } }
+
+/* ══ CURSOR PERSONALIZADO ══ */
+.cursor-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--laranja2); position: fixed;
+  pointer-events: none; z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform .1s ease, background .2s;
+}
+.cursor-ring {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid rgba(255,122,47,0.5);
+  position: fixed; pointer-events: none; z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: left .12s ease, top .12s ease, width .2s, height .2s, border-color .2s;
+}
+.cursor-ring.hover { width: 52px; height: 52px; border-color: var(--laranja2); }
+body { cursor: none; }
+a, button, .plano, .faq-item, .step { cursor: none; }
+@media(max-width:900px){ body { cursor: auto; } a, button, .plano, .faq-item, .step { cursor: auto; } .cursor-dot, .cursor-ring { display: none; } }
+
+/* ══ BARRAS DE HABILIDADE ══ */
+.stats-bar-section { background: linear-gradient(160deg, #070F1E, #0D1F3C); }
+.stats-bar-section .s-title { color: #fff; }
+.stats-bar-section .s-sub { color: rgba(255,255,255,.5); }
+.stats-bar-section .eyebrow { background: rgba(255,122,47,.1); border-color: rgba(255,122,47,.3); color: var(--laranja2); }
+.bars-grid { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+.bar-item {}
+.bar-label {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.bar-label span { font-size: .88rem; font-weight: 600; color: rgba(255,255,255,.85); }
+.bar-label strong { font-family: 'Sora',sans-serif; font-size: 1rem; font-weight: 800; color: var(--laranja2); }
+.bar-track {
+  height: 10px; background: rgba(255,255,255,.07);
+  border-radius: 100px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,.06);
+}
+.bar-fill {
+  height: 100%; border-radius: 100px; width: 0%;
+  background: linear-gradient(90deg, var(--azul3), var(--laranja2));
+  transition: width 1.4s cubic-bezier(.4,0,.2,1);
+  position: relative; overflow: hidden;
+}
+.bar-fill::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; bottom: 0; width: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: barShine 2.5s infinite;
+}
+@keyframes barShine { 0%{left:-100%} 100%{left:200%} }
+
 </style>
 </head>
 <body>
@@ -785,6 +896,11 @@ footer{background:var(--azul);color:rgba(255,255,255,.5);padding:56px 32px 32px;
     </svg>
   </a>
 </div>
+
+
+<!-- CURSOR PERSONALIZADO -->
+<div class="cursor-dot" id="cursor-dot"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
 
 <div class="topbar">
   <div class="topbar-left">
@@ -828,14 +944,34 @@ footer{background:var(--azul);color:rgba(255,255,255,.5);padding:56px 32px 32px;
 
 <!-- HERO -->
 <section class="hero">
+  <canvas id="particles-canvas"></canvas>
   <div class="hero-glow"></div>
   <div class="hero-grid"></div>
-  <div class="hero-content">
+  
+    <!-- SELO GIRATÓRIO -->
+    <div class="selo-giratório">
+      <svg class="selo-svg" viewBox="0 0 110 110" width="110" height="110">
+        <defs>
+          <path id="circulo-texto" d="M 55,55 m -42,0 a 42,42 0 1,1 84,0 a 42,42 0 1,1 -84,0"/>
+        </defs>
+        <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(255,122,47,0.2)" stroke-width="1"/>
+        <circle cx="55" cy="55" r="44" fill="rgba(13,31,60,0.85)" stroke="rgba(255,122,47,0.4)" stroke-width="1.5"/>
+        <text font-size="7.5" font-family="Inter,sans-serif" font-weight="700" fill="rgba(255,122,47,0.9)" letter-spacing="2.5">
+          <textPath href="#circulo-texto">WCurrículos • Profissional • Rápido • Confiável • </textPath>
+        </text>
+      </svg>
+      <div class="selo-center">
+        <div class="selo-icon">⭐</div>
+        <div class="selo-sub">+5mil</div>
+      </div>
+    </div>
+
+    <div class="hero-content">
     <div class="hero-logo-ring">
       <img id="hero-logo" src="" alt="WCurrículos" class="hero-logo">
     </div>
     <div class="hero-badge"><span class="dot"></span> Entrega rápida via WhatsApp</div>
-    <h1>A vaga dos seus sonhos<br>começa com um<br><span class="grad">currículo bem elaborado</span></h1>
+    <h1>A vaga dos seus sonhos<br>começa com um<br><span class="grad typewriter-wrap"><span class="typewriter-text" id="typewriter-el"></span><span class="typewriter-cursor"></span></span></h1>
     <p class="hero-sub">Currículos modernos, estratégicos e prontos para conquistar vagas. Você preenche, a gente entrega no seu WhatsApp.</p>
     <div class="hero-frase">"Seu próximo emprego começa com um currículo profissional."</div>
     <div class="hero-btns">
@@ -1060,6 +1196,7 @@ footer{background:var(--azul);color:rgba(255,255,255,.5);padding:56px 32px 32px;
   <p class="s-sub">Investimento acessível para dar o próximo passo na sua carreira.</p></div>
   <div class="planos-grid">
     <div class="plano" id="plano-basico" onclick="selecionarPlano('basico')">
+      <div class="plano-inner-shine"></div>
       <div class="p-ico">📄</div>
       <div class="ph-title">Básico sem Foto</div>
       <div class="pdesc">Ideal para quem quer praticidade</div>
@@ -1077,6 +1214,7 @@ footer{background:var(--azul);color:rgba(255,255,255,.5);padding:56px 32px 32px;
     </div>
     <div class="plano premium" id="plano-premium" onclick="selecionarPlano('premium')">
       <div class="plano-badge">⭐ Mais escolhido</div>
+      <div class="plano-inner-shine"></div>
       <div class="p-ico">👑</div>
       <div class="ph-title">Premium com Foto</div>
       <div class="pdesc">Destaque-se com visual moderno</div>
@@ -1317,6 +1455,38 @@ footer{background:var(--azul);color:rgba(255,255,255,.5);padding:56px 32px 32px;
 </div>
 
 <!-- FOOTER -->
+
+
+<!-- BARRAS DE HABILIDADE -->
+<section class="section stats-bar-section">
+  <div style="text-align:center">
+    <div class="eyebrow">Nossos números</div>
+    <h2 class="s-title">Por que escolher a WCurrículos?</h2>
+    <p class="s-sub">Resultados reais de quem já investiu em um currículo profissional.</p>
+  </div>
+  <div class="bars-grid">
+    <div class="bar-item reveal">
+      <div class="bar-label"><span>📈 Taxa de clientes que conseguiram entrevistas</span><strong id="pct-1">0%</strong></div>
+      <div class="bar-track"><div class="bar-fill" data-width="94" id="bar-1"></div></div>
+    </div>
+    <div class="bar-item reveal delay-1">
+      <div class="bar-label"><span>⭐ Índice de satisfação dos clientes</span><strong id="pct-2">0%</strong></div>
+      <div class="bar-track"><div class="bar-fill" data-width="98" id="bar-2"></div></div>
+    </div>
+    <div class="bar-item reveal delay-2">
+      <div class="bar-label"><span>⚡ Entregas realizadas no prazo</span><strong id="pct-3">0%</strong></div>
+      <div class="bar-track"><div class="bar-fill" data-width="99" id="bar-3"></div></div>
+    </div>
+    <div class="bar-item reveal delay-3">
+      <div class="bar-label"><span>🔄 Clientes que voltam para atualizar o currículo</span><strong id="pct-4">0%</strong></div>
+      <div class="bar-track"><div class="bar-fill" data-width="72" id="bar-4"></div></div>
+    </div>
+    <div class="bar-item reveal delay-4">
+      <div class="bar-label"><span>📲 Atendimentos respondidos em menos de 1 hora</span><strong id="pct-5">0%</strong></div>
+      <div class="bar-track"><div class="bar-fill" data-width="89" id="bar-5"></div></div>
+    </div>
+  </div>
+</section>
 
 <!-- FAQ -->
 <section class="section faq-section" id="faq">
@@ -1810,6 +1980,278 @@ validarForm = function() {
   _validarOriginal();
   atualizarProgress(3);
 };
+</script>
+
+
+<script>
+// ══════════════════════════════════════════════
+// 1. PARTÍCULAS FLUTUANTES
+// ══════════════════════════════════════════════
+(function(){
+  const canvas = document.getElementById('particles-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let particles = [], W, H, animFrame;
+
+  function resize(){
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+
+  function Particle(){
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.r = Math.random() * 2 + 0.5;
+    this.dx = (Math.random() - 0.5) * 0.4;
+    this.dy = (Math.random() - 0.5) * 0.4;
+    this.alpha = Math.random() * 0.5 + 0.1;
+    this.color = Math.random() > 0.6
+      ? `rgba(255,122,47,${this.alpha})`
+      : `rgba(255,255,255,${this.alpha})`;
+  }
+
+  function initParticles(){
+    const count = Math.min(Math.floor((W * H) / 8000), 120);
+    particles = Array.from({length: count}, () => new Particle());
+  }
+
+  function drawLine(p1, p2, dist){
+    const alpha = (1 - dist / 130) * 0.15;
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+    ctx.lineWidth = 0.5;
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+  }
+
+  function animate(){
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.x += p.dx; p.y += p.dy;
+      if (p.x < 0 || p.x > W) p.dx *= -1;
+      if (p.y < 0 || p.y > H) p.dy *= -1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+    });
+    // Conectar partículas próximas
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 130) drawLine(particles[i], particles[j], dist);
+      }
+    }
+    animFrame = requestAnimationFrame(animate);
+  }
+
+  window.addEventListener('resize', () => { resize(); initParticles(); });
+  resize();
+  initParticles();
+  animate();
+})();
+
+// ══════════════════════════════════════════════
+// 2. TYPEWRITER
+// ══════════════════════════════════════════════
+(function(){
+  const el = document.getElementById('typewriter-el');
+  if (!el) return;
+  const frases = [
+    'currículo bem elaborado',
+    'currículo profissional',
+    'currículo moderno',
+    'currículo que abre portas',
+  ];
+  let fi = 0, ci = 0, apagando = false, pausado = false;
+
+  function type(){
+    const frase = frases[fi];
+    if (!apagando) {
+      if (ci < frase.length) {
+        el.textContent = frase.slice(0, ++ci);
+        setTimeout(type, 65);
+      } else {
+        pausado = true;
+        setTimeout(() => { apagando = true; pausado = false; type(); }, 2200);
+      }
+    } else {
+      if (ci > 0) {
+        el.textContent = frase.slice(0, --ci);
+        setTimeout(type, 35);
+      } else {
+        apagando = false;
+        fi = (fi + 1) % frases.length;
+        setTimeout(type, 300);
+      }
+    }
+  }
+  setTimeout(type, 800);
+})();
+
+// ══════════════════════════════════════════════
+// 3. CURSOR PERSONALIZADO
+// ══════════════════════════════════════════════
+(function(){
+  if (window.innerWidth <= 900) return;
+  const dot  = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  if (!dot || !ring) return;
+
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.left  = mx + 'px';
+    dot.style.top   = my + 'px';
+  });
+
+  function lerp(a, b, t){ return a + (b - a) * t; }
+  function loopRing(){
+    rx = lerp(rx, mx, 0.12);
+    ry = lerp(ry, my, 0.12);
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(loopRing);
+  }
+  loopRing();
+
+  // Hover em elementos interativos
+  const hoverEls = document.querySelectorAll('a, button, .plano, .faq-item, .step, .dep-card');
+  hoverEls.forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+  });
+
+  // Esconder quando sai da janela
+  document.addEventListener('mouseleave', () => { dot.style.opacity = '0'; ring.style.opacity = '0'; });
+  document.addEventListener('mouseenter', () => { dot.style.opacity = '1'; ring.style.opacity = '1'; });
+})();
+
+// ══════════════════════════════════════════════
+// 4. CARD 3D TILT
+// ══════════════════════════════════════════════
+(function(){
+  if (window.innerWidth <= 768) return;
+  document.querySelectorAll('.plano').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const cx = rect.left + rect.width  / 2;
+      const cy = rect.top  + rect.height / 2;
+      const dx = (e.clientX - cx) / (rect.width  / 2);
+      const dy = (e.clientY - cy) / (rect.height / 2);
+      const tiltX = dy * -12;
+      const tiltY = dx *  12;
+      card.style.transform = `perspective(900px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.03)`;
+      card.style.boxShadow = `${-tiltY * 2}px ${tiltX * 2}px 40px rgba(13,31,60,0.25)`;
+
+      // Mover o shine
+      const shine = card.querySelector('.plano-inner-shine');
+      if (shine) {
+        const px = ((e.clientX - rect.left) / rect.width)  * 100;
+        const py = ((e.clientY - rect.top)  / rect.height) * 100;
+        shine.style.background = `radial-gradient(circle at ${px}% ${py}%, rgba(255,255,255,0.12), transparent 60%)`;
+      }
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+      card.style.boxShadow = '';
+    });
+  });
+})();
+
+// ══════════════════════════════════════════════
+// 5. GRADIENTE ANIMADO DO HERO
+// ══════════════════════════════════════════════
+(function(){
+  const hero = document.querySelector('.hero');
+  if (!hero) return;
+  hero.style.background = 'linear-gradient(270deg, #060E1C, #0D1F3C, #0E2347, #1A1040, #060E1C)';
+  hero.style.backgroundSize = '400% 400%';
+})();
+
+// ══════════════════════════════════════════════
+// 6. BARRAS DE HABILIDADE ANIMADAS
+// ══════════════════════════════════════════════
+(function(){
+  const bars = [
+    { bar: 'bar-1', pct: 'pct-1', val: 94 },
+    { bar: 'bar-2', pct: 'pct-2', val: 98 },
+    { bar: 'bar-3', pct: 'pct-3', val: 99 },
+    { bar: 'bar-4', pct: 'pct-4', val: 72 },
+    { bar: 'bar-5', pct: 'pct-5', val: 89 },
+  ];
+
+  function animarBarra(barEl, pctEl, alvo, delay){
+    setTimeout(() => {
+      barEl.style.width = alvo + '%';
+      // Animar número
+      let atual = 0;
+      const step = alvo / 60;
+      const timer = setInterval(() => {
+        atual = Math.min(atual + step, alvo);
+        pctEl.textContent = Math.round(atual) + '%';
+        if (atual >= alvo) clearInterval(timer);
+      }, 25);
+    }, delay);
+  }
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        bars.forEach((b, i) => {
+          const barEl = document.getElementById(b.bar);
+          const pctEl = document.getElementById(b.pct);
+          if (barEl && pctEl) animarBarra(barEl, pctEl, b.val, i * 180);
+        });
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const section = document.querySelector('.stats-bar-section');
+  if (section) observer.observe(section);
+})();
+
+// ══════════════════════════════════════════════
+// 7. NÚMEROS CONTANDO AO ENTRAR NA TELA (Stats hero)
+// ══════════════════════════════════════════════
+(function(){
+  const statsSection = document.querySelector('.hero-stats');
+  if (!statsSection) return;
+
+  // Já animado pelo contador de acessos, só fazer os outros
+  function countUp(el, target, suffix, prefix, duration){
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start = Math.min(start + step, target);
+      const val = Math.floor(start);
+      el.innerHTML = (prefix || '') + val + (suffix || '');
+      if (start >= target) clearInterval(timer);
+    }, 16);
+  }
+
+  let animado = false;
+  const observer = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !animado) {
+      animado = true;
+      // Stat 2h
+      const stat2 = document.querySelectorAll('.stat .num')[1];
+      if (stat2) { stat2.innerHTML = '0<em>h</em>'; countUp(stat2, 2, '<em>h</em>', '', 1000); }
+      // Stat R$19
+      const stat3 = document.querySelectorAll('.stat .num')[2];
+      if (stat3) { stat3.innerHTML = '<em>R$</em>0'; countUp(stat3, 19, '', '<em>R$</em>', 1200); }
+      // Stat 100%
+      const stat4 = document.querySelectorAll('.stat .num')[3];
+      if (stat4) { stat4.innerHTML = '0<em>%</em>'; countUp(stat4, 100, '<em>%</em>', '', 1500); }
+    }
+  }, { threshold: 0.5 });
+  observer.observe(statsSection);
+})();
 </script>
 
 </body>
