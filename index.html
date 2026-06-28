@@ -409,8 +409,7 @@ footer{background:var(--azul);color:rgba(255,255,255,.5);padding:56px 32px 32px;
 .cv-edu-d{font-size:8.5pt;color:#546E8A;}
 .cv-brand{position:absolute;bottom:20px;right:24px;font-size:7pt;color:#D1DDE8;font-weight:600;}
 
-@media(max-width:640px){
-  .topbar{padding:8px 16px;}.topbar-left{display:none;}
+.topbar-left{display:none;}
   nav{padding:0 16px;}.nav-links{display:none;}
   .hero{padding:60px 20px 72px;}.section{padding:56px 20px;}
   .fcard{padding:24px 18px;}.pag-card{padding:28px 20px;}
@@ -586,10 +585,187 @@ footer{background:var(--azul);color:rgba(255,255,255,.5);padding:56px 32px 32px;
 .plano.premium .plano-garantia { color: #5dde8a; background: rgba(37,211,102,.1); border-color: rgba(37,211,102,.2); }
 
 /* META TAGS já estão no head */
-@media(max-width:640px){
-  .wpp-float { bottom: 20px; right: 16px; }
+
   .urgencia-inner { flex-direction: column; gap: 12px; }
   .progress-steps { display: none; }
+}
+
+
+/* ══════════════════════════════════════
+   MOBILE FIRST — MAX 640px
+══════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* TOPBAR */
+  .topbar { padding: 8px 16px; justify-content: center; }
+  .topbar-left { display: none; }
+  .topbar-right { gap: 8px; }
+  .social-btn { padding: 5px 12px; font-size: .72rem; }
+
+  /* NAVBAR */
+  nav { padding: 0 16px; height: 64px; }
+  .nav-brand .brand-main { font-size: 1.1rem; }
+  .nav-brand .brand-sub { display: none; }
+  .nav-links { display: none; }
+  .nav-right { gap: 8px; }
+  .nav-ig { display: none; }
+  .nav-cta { padding: 8px 16px; font-size: .82rem; }
+
+  /* HERO */
+  .hero { padding: 48px 20px 56px; min-height: auto; }
+  .hero-logo { width: 96px; height: 96px; border-radius: 18px; }
+  .hero-logo-ring { margin-bottom: 24px; }
+  .hero h1 { font-size: 1.9rem; letter-spacing: -.5px; margin-bottom: 14px; }
+  .hero-sub { font-size: .92rem; margin-bottom: 12px; }
+  .hero-frase { font-size: .88rem; margin-bottom: 24px; }
+  .hero-btns { flex-direction: column; align-items: center; gap: 10px; margin-bottom: 36px; }
+  .btn-main, .btn-sec { width: 100%; max-width: 320px; justify-content: center; padding: 15px 24px; font-size: .95rem; }
+  .hero-stats { padding: 18px 16px; gap: 0; border-radius: 14px; }
+  .stat .num { font-size: 1.4rem; }
+  .stat .lbl { font-size: .62rem; }
+  .stat { min-width: 70px; padding: 4px 8px; }
+
+  /* FAIXA MOTIVACIONAL */
+  .faixa-mot { padding: 14px 16px; }
+  .faixa-mot p { font-size: .85rem; }
+
+  /* URGÊNCIA */
+  .urgencia-bar { padding: 14px 16px; }
+  .urgencia-inner { flex-direction: column; gap: 10px; }
+  .urgencia-text { font-size: .82rem; }
+  .timer-num { font-size: 1.2rem; }
+  .timer-block { padding: 6px 10px; min-width: 46px; }
+  .urgencia-cta { padding: 9px 18px; font-size: .82rem; width: 100%; text-align: center; }
+
+  /* SEÇÕES GERAIS */
+  .section { padding: 48px 16px; }
+  .s-title { font-size: 1.5rem; }
+  .s-sub { font-size: .88rem; margin-bottom: 36px; }
+  .eyebrow { font-size: .68rem; }
+
+  /* COMO FUNCIONA */
+  .steps { display: flex; flex-direction: column; gap: 20px; max-width: 100%; }
+  .steps::before { display: none; }
+  .step { display: flex; flex-direction: row; align-items: center; gap: 16px; padding: 0 0 20px; text-align: left; border-bottom: 1px solid var(--borda); }
+  .step:last-child { border-bottom: none; padding-bottom: 0; }
+  .step-circle { width: 64px; height: 64px; flex-shrink: 0; margin: 0; }
+  .step-ico { font-size: 1.6rem; }
+  .step h3 { font-size: .92rem; margin-bottom: 4px; }
+  .step p { font-size: .78rem; }
+
+  /* PROVA SOCIAL INSTAGRAM */
+  div[style*="gap: 48px"] { flex-direction: column !important; gap: 24px !important; }
+  div[style*="gap:48px"] { flex-direction: column !important; gap: 24px !important; }
+
+  /* DEPOIMENTOS */
+  .deps-grid { grid-template-columns: 1fr; gap: 16px; }
+  .dep-card { padding: 24px 20px; }
+  .dep-text { font-size: .88rem; }
+
+  /* GARANTIA */
+  .garantia-bar { padding: 32px 16px; }
+  .garantia-bar h3 { font-size: 1.2rem; }
+  .garantia-bar p { font-size: .85rem; }
+  .garantia-items { flex-direction: column; gap: 14px; align-items: flex-start; padding-left: 8px; }
+
+  /* EXEMPLO ANTES/DEPOIS */
+  .exemplo-cards { flex-direction: column; }
+  .exemplo-card { min-width: 100%; max-width: 100%; }
+
+  /* PLANOS */
+  .planos-grid { flex-direction: column; align-items: center; }
+  .plano { min-width: 100%; max-width: 100%; padding: 32px 24px; }
+  .preco { font-size: 2.2rem; }
+  .plano li { font-size: .84rem; }
+
+  /* CTA INSTAGRAM */
+  .ig-section { padding: 48px 16px; }
+  .ig-section h2 { font-size: 1.4rem; }
+  .ig-section p { font-size: .88rem; }
+  .btn-seguir { padding: 14px 24px; font-size: .92rem; width: 100%; max-width: 300px; justify-content: center; }
+
+  /* FORMULÁRIO */
+  .form-wrap { padding: 0; }
+  .form-plano-bar { padding: 16px 18px; border-radius: 12px; }
+  .form-plano-bar .pl-nome { font-size: .95rem; }
+  .form-plano-bar .pl-val { font-size: 1.4rem; }
+  .fcard { padding: 20px 16px; border-radius: 14px; }
+  .fcard-head { gap: 10px; padding-bottom: 14px; margin-bottom: 18px; }
+  .fcard-head h3 { font-size: .92rem; }
+  .fcard-head p { font-size: .72rem; }
+  .frow { flex-direction: column; gap: 0; }
+  .fg { min-width: 100%; }
+  input, textarea, select { padding: 12px 14px; font-size: .9rem; }
+  .escol-row { grid-template-columns: 1fr; gap: 16px; }
+  .radio-grid { grid-template-columns: 1fr; }
+  .r-item, .c-item { padding: 11px 14px; }
+  .exp-card { padding: 16px; }
+  #btn-pagar { padding: 16px; font-size: 1rem; }
+
+  /* BARRA DE PROGRESSO */
+  .progress-bar-wrap { padding: 14px 16px; }
+  .progress-steps { gap: 0; }
+  .prog-circle { width: 30px; height: 30px; font-size: .72rem; }
+  .prog-lbl { font-size: .6rem; }
+
+  /* PAGAMENTO */
+  .pag-card { padding: 24px 16px; }
+  .pag-val { font-size: 2.8rem; }
+  #qrcode-container canvas { width: 160px !important; height: 160px !important; }
+  .pix-box { padding: 14px 16px; }
+  .pix-key { font-size: .76rem; }
+  .instrucoes { padding: 14px 16px; }
+  .instrucoes li { font-size: .8rem; }
+  #btn-confirmar { padding: 15px; font-size: .95rem; }
+
+  /* FAQ */
+  .faq-grid { gap: 10px; }
+  .faq-q { padding: 16px 18px; }
+  .faq-q-text { font-size: .88rem; }
+  .faq-a { padding: 0 18px; font-size: .85rem; }
+  .faq-item.aberto .faq-a { padding: 0 18px 16px; }
+
+  /* MODAL */
+  .modal-ov { padding: 12px; }
+  .modal { padding: 28px 20px; border-radius: 18px; }
+  .modal h3 { font-size: 1.2rem; }
+  .drop-comp { padding: 24px; }
+
+  /* SUCESSO */
+  .suc-card { padding: 40px 20px; }
+  .suc-card h2 { font-size: 1.6rem; }
+  .suc-anim { font-size: 4rem; }
+  #btn-wpp-suc { padding: 14px 24px; font-size: .92rem; width: 100%; justify-content: center; }
+
+  /* FOOTER */
+  footer { padding: 40px 16px 28px; }
+  .footer-top { flex-direction: column; gap: 28px; }
+  .footer-brand p { max-width: 100%; }
+  .footer-social { flex-wrap: wrap; }
+  .footer-bottom { font-size: .72rem; }
+
+  /* BOTÃO FLUTUANTE */
+  .wpp-float { bottom: 16px; right: 14px; }
+  .wpp-float-btn { width: 54px; height: 54px; }
+  .wpp-float-tooltip { display: none; }
+
+  /* SUCESSO CARD */
+  .suc-card { border-radius: 18px; }
+  .prazo { font-size: .76rem; padding: 7px 14px; }
+}
+
+/* ══ TABLET 641-900px ══ */
+@media (min-width: 641px) and (max-width: 900px) {
+  .hero h1 { font-size: 2.4rem; }
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .steps::before { display: none; }
+  .deps-grid { grid-template-columns: 1fr 1fr; }
+  .planos-grid { flex-direction: column; align-items: center; }
+  .plano { max-width: 480px; width: 100%; }
+  .frow { flex-wrap: wrap; }
+  .nav-links { display: none; }
+  .footer-top { gap: 32px; }
+  .radio-grid { grid-template-columns: 1fr 1fr; }
 }
 
 </style>
