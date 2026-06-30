@@ -1290,6 +1290,96 @@ a, button, .plano, .faq-item, .step { cursor: none; }
 }
 .cvb-brand span { font-size: 7pt; color: #546E8A; font-weight: 700; font-family: 'Sora', sans-serif; }
 
+
+/* ══ BARRA DE PROGRESSO EM TEMPO REAL ══ */
+.realtime-progress-wrap {
+  position: sticky;
+  top: 64px;
+  z-index: 999;
+  background: #fff;
+  border-bottom: 1px solid var(--borda);
+  box-shadow: 0 4px 20px rgba(13,31,60,0.08);
+  padding: 12px 24px;
+  margin-bottom: 0;
+  transition: all .3s;
+}
+.rp-inner {
+  max-width: 740px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.rp-label {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--sub);
+  white-space: nowrap;
+  min-width: 110px;
+}
+.rp-label strong {
+  color: var(--azul);
+  font-size: .85rem;
+}
+.rp-bar-track {
+  flex: 1;
+  height: 10px;
+  background: var(--cinza2);
+  border-radius: 100px;
+  overflow: hidden;
+  position: relative;
+}
+.rp-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--azul3), var(--laranja2));
+  width: 0%;
+  transition: width .4s cubic-bezier(.4,0,.2,1);
+  position: relative;
+  overflow: hidden;
+}
+.rp-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; bottom: 0; width: 60%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: rpShine 2s infinite;
+}
+@keyframes rpShine { 0%{left:-100%} 100%{left:200%} }
+.rp-pct {
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  min-width: 44px;
+  text-align: right;
+  transition: color .3s;
+}
+.rp-pct.baixo   { color: var(--sub); }
+.rp-pct.medio   { color: var(--azul3); }
+.rp-pct.alto    { color: var(--laranja); }
+.rp-pct.completo{ color: #25D366; }
+.rp-emoji {
+  font-size: 1.2rem;
+  transition: all .3s;
+  min-width: 24px;
+  text-align: center;
+}
+/* Mensagem motivacional */
+.rp-msg {
+  font-size: .72rem;
+  color: var(--sub);
+  white-space: nowrap;
+  font-weight: 500;
+  min-width: 160px;
+  transition: all .3s;
+}
+@media(max-width:640px){
+  .realtime-progress-wrap { padding: 10px 16px; top: 64px; }
+  .rp-msg { display: none; }
+  .rp-label { min-width: 80px; font-size: .72rem; }
+  .rp-pct { font-size: .9rem; min-width: 36px; }
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
@@ -1670,7 +1760,21 @@ a, button, .plano, .faq-item, .step { cursor: none; }
 
 <!-- FORMULÁRIO -->
 <section class="section" id="secao-formulario">
-  <div style="text-align:center;margin-bottom:40px">
+  
+    <!-- BARRA DE PROGRESSO EM TEMPO REAL -->
+    <div class="realtime-progress-wrap" id="rp-wrap" style="display:none;">
+      <div class="rp-inner">
+        <div class="rp-label">Preenchimento<br><strong id="rp-campos">0 de 0 campos</strong></div>
+        <div class="rp-bar-track">
+          <div class="rp-bar-fill" id="rp-fill"></div>
+        </div>
+        <div class="rp-pct baixo" id="rp-pct">0%</div>
+        <div class="rp-emoji" id="rp-emoji">📝</div>
+        <div class="rp-msg" id="rp-msg">Preencha seus dados...</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:40px">
     <div class="eyebrow">Etapa 2 de 3</div>
     <h2 class="s-title">Preencha seus dados</h2>
     <p class="s-sub">Quanto mais detalhado, melhor ficará seu currículo!</p>
@@ -2963,6 +3067,186 @@ function gerarEEnviarCV(d) {
 function gerarCV() {
   gerarEEnviarCV(dados);
 }
+</script>
+
+
+<script>
+// ══ BARRA DE PROGRESSO EM TEMPO REAL ══
+(function() {
+
+  // Todos os campos a monitorar com pesos
+  const CAMPOS = [
+    // Dados pessoais (peso 2 cada)
+    { id: 'f-nome',    peso: 2, label: 'Nome' },
+    { id: 'f-nasc',    peso: 2, label: 'Nascimento' },
+    { id: 'f-email',   peso: 2, label: 'E-mail' },
+    { id: 'f-tel',     peso: 2, label: 'WhatsApp' },
+    // Endereço (peso 1 cada)
+    { id: 'f-cep',     peso: 1, label: 'CEP' },
+    { id: 'f-cidade',  peso: 1, label: 'Cidade' },
+    { id: 'f-bairro',  peso: 1, label: 'Bairro' },
+    { id: 'f-estado',  peso: 1, label: 'Estado' },
+    // Qualidades e cursos (peso 2)
+    { id: 'f-qual',    peso: 2, label: 'Qualidades' },
+    { id: 'f-cursos',  peso: 1, label: 'Cursos' },
+    // Superior (peso 1, opcional mas conta)
+    { id: 'f-sup',     peso: 1, label: 'Superior' },
+  ];
+
+  // Radio groups (peso 2 cada)
+  const RADIOS = [
+    { name: 'fund',  peso: 2, label: 'Fundamental' },
+    { name: 'medio', peso: 2, label: 'Médio' },
+    { name: 'cnh',   peso: 2, label: 'CNH' },
+  ];
+
+  // Experiências (peso 1 cada, verificar se tem ao menos 1 campo preenchido)
+  const EXPS = [
+    { classes: ['.exp-emp', '.exp-per', '.exp-car'], peso: 2, label: 'Experiência 1' },
+  ];
+
+  // Foto (premium only, peso 3)
+  const FOTO = { id: 'prev-foto', peso: 3, label: 'Foto' };
+
+  // Mensagens por faixa
+  const MSGS = [
+    { min: 0,   max: 20,  emoji: '📝', msg: 'Vamos lá! Preencha seus dados...',    classe: 'baixo' },
+    { min: 20,  max: 40,  emoji: '✏️', msg: 'Ótimo começo! Continue assim...',      classe: 'baixo' },
+    { min: 40,  max: 60,  emoji: '💪', msg: 'Na metade! Você está indo bem!',       classe: 'medio' },
+    { min: 60,  max: 80,  emoji: '🔥', msg: 'Quase lá! Só mais um pouco...',        classe: 'alto' },
+    { min: 80,  max: 99,  emoji: '⭐', msg: 'Incrível! Finalizando...',             classe: 'alto' },
+    { min: 99,  max: 101, emoji: '🎉', msg: 'Perfeito! Tudo preenchido!',           classe: 'completo' },
+  ];
+
+  function calcularProgresso() {
+    let totalPeso = 0;
+    let preenchidoPeso = 0;
+    let camposPreenchidos = 0;
+    let totalCampos = 0;
+
+    // Campos de texto/textarea
+    CAMPOS.forEach(campo => {
+      const el = document.getElementById(campo.id);
+      if (!el) return;
+      totalPeso += campo.peso;
+      totalCampos++;
+      if (el.value.trim().length > 0) {
+        preenchidoPeso += campo.peso;
+        camposPreenchidos++;
+      }
+    });
+
+    // Radio groups
+    RADIOS.forEach(radio => {
+      const checked = document.querySelector(`input[name="${radio.name}"]:checked`);
+      totalPeso += radio.peso;
+      totalCampos++;
+      if (checked) {
+        preenchidoPeso += radio.peso;
+        camposPreenchidos++;
+      }
+    });
+
+    // Experiência (pelo menos empresa preenchida)
+    const expEmps = document.querySelectorAll('.exp-emp');
+    totalPeso += 2; totalCampos++;
+    if (expEmps.length && expEmps[0].value.trim()) {
+      preenchidoPeso += 2;
+      camposPreenchidos++;
+    }
+
+    // Foto (só se for premium)
+    if (plano === 'premium') {
+      const fotoEl = document.getElementById('prev-foto');
+      totalPeso += FOTO.peso;
+      totalCampos++;
+      if (fotoEl && fotoEl.src && fotoEl.src.startsWith('data:image')) {
+        preenchidoPeso += FOTO.peso;
+        camposPreenchidos++;
+      }
+    }
+
+    const pct = totalPeso > 0 ? Math.round((preenchidoPeso / totalPeso) * 100) : 0;
+    return { pct, camposPreenchidos, totalCampos };
+  }
+
+  function atualizarBarra() {
+    const wrap = document.getElementById('rp-wrap');
+    if (!wrap || wrap.style.display === 'none') return;
+
+    const { pct, camposPreenchidos, totalCampos } = calcularProgresso();
+
+    // Atualizar barra
+    document.getElementById('rp-fill').style.width = pct + '%';
+    document.getElementById('rp-pct').textContent = pct + '%';
+    document.getElementById('rp-campos').textContent = `${camposPreenchidos} de ${totalCampos} campos`;
+
+    // Gradiente dinâmico da barra
+    let cor;
+    if (pct < 30) cor = 'linear-gradient(90deg, #2456A4, #546E8A)';
+    else if (pct < 60) cor = 'linear-gradient(90deg, #2456A4, #FF7A2F)';
+    else if (pct < 90) cor = 'linear-gradient(90deg, #E8621A, #FF7A2F)';
+    else cor = 'linear-gradient(90deg, #25D366, #1da851)';
+    document.getElementById('rp-fill').style.background = cor;
+
+    // Mensagem e emoji
+    const msg = MSGS.find(m => pct >= m.min && pct < m.max) || MSGS[MSGS.length-1];
+    document.getElementById('rp-emoji').textContent = msg.emoji;
+    document.getElementById('rp-msg').textContent   = msg.msg;
+
+    // Cor da porcentagem
+    const pctEl = document.getElementById('rp-pct');
+    pctEl.className = 'rp-pct ' + msg.classe;
+
+    // Animação especial quando completo
+    if (pct >= 100) {
+      document.getElementById('rp-wrap').style.background =
+        'linear-gradient(135deg, #f0fff4, #e8f5e9)';
+    } else {
+      document.getElementById('rp-wrap').style.background = '#fff';
+    }
+  }
+
+  function iniciarMonitoramento() {
+    const wrap = document.getElementById('rp-wrap');
+    if (wrap) wrap.style.display = 'block';
+
+    // Adicionar listeners em todos os campos
+    CAMPOS.forEach(campo => {
+      const el = document.getElementById(campo.id);
+      if (!el) return;
+      el.addEventListener('input', atualizarBarra);
+      el.addEventListener('change', atualizarBarra);
+    });
+
+    // Radio buttons
+    document.querySelectorAll('input[type="radio"]').forEach(r => {
+      r.addEventListener('change', atualizarBarra);
+    });
+
+    // Experiências
+    document.querySelectorAll('.exp-emp, .exp-per, .exp-car').forEach(el => {
+      el.addEventListener('input', atualizarBarra);
+    });
+
+    // Foto
+    const fotoInput = document.getElementById('f-foto');
+    if (fotoInput) fotoInput.addEventListener('change', () => {
+      setTimeout(atualizarBarra, 300);
+    });
+
+    // Calcular inicial
+    atualizarBarra();
+  }
+
+  // Hookar na função selecionarPlano para mostrar a barra quando o formulário aparecer
+  const _selOriginal = window.selecionarPlano;
+  window.selecionarPlano = function(t) {
+    _selOriginal(t);
+    setTimeout(iniciarMonitoramento, 400);
+  };
+
+})();
 </script>
 
 </body>
