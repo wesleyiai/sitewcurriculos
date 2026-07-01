@@ -847,22 +847,6 @@ footer{background:var(--azul);color:rgba(255,255,255,.5);padding:56px 32px 32px;
   100% { background-position: 0% 50%; }
 }
 
-/* ══ SELO GIRATÓRIO ══ */
-.selo-giratório {
-  position: absolute; top: 32px; right: 32px;
-  width: 110px; height: 110px; z-index: 3;
-}
-.selo-svg { animation: rotateSelo 12s linear infinite; }
-.selo-center {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  flex-direction: column;
-}
-.selo-center .selo-icon { font-size: 1.6rem; }
-.selo-center .selo-sub { font-size: .48rem; color: var(--laranja2); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-@keyframes rotateSelo { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-@media(max-width:640px){ .selo-giratório { width: 80px; height: 80px; top: 16px; right: 16px; } .selo-center .selo-icon { font-size: 1.1rem; } }
-
 /* ══ CURSOR PERSONALIZADO ══ */
 .cursor-dot {
   width: 8px; height: 8px; border-radius: 50%;
@@ -1703,24 +1687,6 @@ a, button, .plano, .faq-item, .step { cursor: none; }
   <canvas id="particles-canvas"></canvas>
   <div class="hero-glow"></div>
   <div class="hero-grid"></div>
-  
-    <!-- SELO GIRATÓRIO -->
-    <div class="selo-giratório">
-      <svg class="selo-svg" viewBox="0 0 110 110" width="110" height="110">
-        <defs>
-          <path id="circulo-texto" d="M 55,55 m -42,0 a 42,42 0 1,1 84,0 a 42,42 0 1,1 -84,0"/>
-        </defs>
-        <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(255,122,47,0.2)" stroke-width="1"/>
-        <circle cx="55" cy="55" r="44" fill="rgba(13,31,60,0.85)" stroke="rgba(255,122,47,0.4)" stroke-width="1.5"/>
-        <text font-size="7.5" font-family="Inter,sans-serif" font-weight="700" fill="rgba(255,122,47,0.9)" letter-spacing="2.5">
-          <textPath href="#circulo-texto">WCurrículos • Profissional • Rápido • Confiável • </textPath>
-        </text>
-      </svg>
-      <div class="selo-center">
-        <div class="selo-icon">⭐</div>
-        <div class="selo-sub">+5mil</div>
-      </div>
-    </div>
 
     <div class="hero-content">
     <div class="hero-logo-ring">
@@ -3451,8 +3417,10 @@ function gerarEEnviarCV(d) {
       cursos:        d.cursos || 'Nenhum',
       qualidades:    d.qual,
       cnh:           d.cnh,
-      // PDF em base64 (sem o prefixo data:application/pdf;base64,)
-      curriculo_pdf: pdfDataUri.split(',')[1],
+      // PDF em base64, no formato Data URI completo (é o formato que a
+      // documentação do EmailJS usa como exemplo para anexos dinâmicos —
+      // ver "Variable Attachment" em Attachments no editor do template)
+      curriculo_pdf: pdfDataUri,
       // Para o assunto do email
       to_name: 'WCurriculos',
     };
