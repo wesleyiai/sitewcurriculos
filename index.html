@@ -1291,67 +1291,76 @@ a, button, .plano, .faq-item, .step { cursor: none; }
 .cvb-brand span { font-size: 7pt; color: #546E8A; font-weight: 700; font-family: 'Sora', sans-serif; }
 
 
-/* ══ BARRA DE PROGRESSO EM TEMPO REAL ══ */
+/* ══ BARRA DE PROGRESSO EM TEMPO REAL (LATERAL, ACOMPANHA O SCROLL) ══ */
 .realtime-progress-wrap {
-  position: sticky;
-  top: 64px;
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
   z-index: 999;
   background: #fff;
-  border-bottom: 1px solid var(--borda);
-  box-shadow: 0 4px 20px rgba(13,31,60,0.08);
-  padding: 12px 24px;
-  margin-bottom: 0;
+  border: 1px solid var(--borda);
+  border-right: none;
+  border-radius: 16px 0 0 16px;
+  box-shadow: -6px 6px 28px rgba(13,31,60,0.16), 0 4px 20px rgba(13,31,60,0.06);
+  padding: 16px 12px;
   transition: all .3s;
 }
 .rp-inner {
-  max-width: 740px;
-  margin: 0 auto;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
+  width: 62px;
 }
 .rp-label {
-  font-size: .78rem;
+  order: 5;
+  font-size: .62rem;
   font-weight: 700;
   color: var(--sub);
-  white-space: nowrap;
-  min-width: 110px;
+  text-align: center;
+  line-height: 1.3;
 }
 .rp-label strong {
+  display: block;
   color: var(--azul);
-  font-size: .85rem;
+  font-size: .66rem;
+  margin-top: 2px;
 }
 .rp-bar-track {
-  flex: 1;
-  height: 10px;
+  order: 3;
+  width: 10px;
+  height: 130px;
   background: var(--cinza2);
   border-radius: 100px;
   overflow: hidden;
   position: relative;
+  display: flex;
+  align-items: flex-end;
 }
 .rp-bar-fill {
-  height: 100%;
+  width: 100%;
   border-radius: 100px;
-  background: linear-gradient(90deg, var(--azul3), var(--laranja2));
-  width: 0%;
-  transition: width .4s cubic-bezier(.4,0,.2,1);
+  background: linear-gradient(0deg, var(--azul3), var(--laranja2));
+  height: 0%;
+  transition: height .4s cubic-bezier(.4,0,.2,1);
   position: relative;
   overflow: hidden;
 }
 .rp-bar-fill::after {
   content: '';
   position: absolute;
-  top: 0; left: -100%; bottom: 0; width: 60%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  left: 0; top: -100%; right: 0; height: 60%;
+  background: linear-gradient(0deg, transparent, rgba(255,255,255,0.4), transparent);
   animation: rpShine 2s infinite;
 }
-@keyframes rpShine { 0%{left:-100%} 100%{left:200%} }
+@keyframes rpShine { 0%{top:-100%} 100%{top:200%} }
 .rp-pct {
+  order: 1;
   font-family: 'Sora', sans-serif;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 900;
-  min-width: 44px;
-  text-align: right;
+  text-align: center;
   transition: color .3s;
 }
 .rp-pct.baixo   { color: var(--sub); }
@@ -1359,25 +1368,21 @@ a, button, .plano, .faq-item, .step { cursor: none; }
 .rp-pct.alto    { color: var(--laranja); }
 .rp-pct.completo{ color: #25D366; }
 .rp-emoji {
-  font-size: 1.2rem;
+  order: 2;
+  font-size: 1.25rem;
   transition: all .3s;
-  min-width: 24px;
   text-align: center;
 }
-/* Mensagem motivacional */
-.rp-msg {
-  font-size: .72rem;
-  color: var(--sub);
-  white-space: nowrap;
-  font-weight: 500;
-  min-width: 160px;
-  transition: all .3s;
-}
+/* Mensagem motivacional (ocultada no formato lateral, sem espaço horizontal) */
+.rp-msg { display: none; }
 @media(max-width:640px){
-  .realtime-progress-wrap { padding: 10px 16px; top: 64px; }
-  .rp-msg { display: none; }
-  .rp-label { min-width: 80px; font-size: .72rem; }
-  .rp-pct { font-size: .9rem; min-width: 36px; }
+  .realtime-progress-wrap { padding: 12px 8px; border-radius: 14px 0 0 14px; }
+  .rp-inner { width: 46px; gap: 6px; }
+  .rp-bar-track { height: 90px; width: 8px; }
+  .rp-label { font-size: .56rem; }
+  .rp-label strong { font-size: .6rem; }
+  .rp-pct { font-size: .85rem; }
+  .rp-emoji { font-size: 1rem; }
 }
 
 
@@ -2024,18 +2029,18 @@ a, button, .plano, .faq-item, .step { cursor: none; }
       <div class="fcard-head"><div class="fcard-num">1</div><div><h3>Dados Pessoais</h3><p>Informações básicas para identificação</p></div></div>
       <div class="frow">
         <div class="fg"><label>📋 Nome Completo *</label><input type="text" id="f-nome" placeholder="Seu nome completo"></div>
-        <div class="fg"><label>🎂 Data de Nascimento *</label><input type="text" id="f-nasc" placeholder="DD/MM/AAAA"></div>
+        <div class="fg"><label>🎂 Data de Nascimento *</label><input type="text" id="f-nasc" placeholder="DD/MM/AAAA" inputmode="numeric" maxlength="10"></div>
       </div>
       <div class="frow">
         <div class="fg"><label>📧 E-mail *</label><input type="email" id="f-email" placeholder="seu@email.com"></div>
-        <div class="fg"><label>📱 Telefone/WhatsApp *</label><input type="tel" id="f-tel" placeholder="(82) 99999-9999"></div>
+        <div class="fg"><label>📱 Telefone/WhatsApp *</label><input type="tel" id="f-tel" placeholder="(82) 99999-9999" inputmode="numeric" maxlength="15"></div>
       </div>
     </div>
 
     <div class="fcard">
       <div class="fcard-head"><div class="fcard-num">2</div><div><h3>Endereço</h3><p>Localização para constar no currículo</p></div></div>
       <div class="frow">
-        <div class="fg"><label>📌 CEP *</label><input type="text" id="f-cep" placeholder="00000-000"></div>
+        <div class="fg"><label>📌 CEP *</label><input type="text" id="f-cep" placeholder="00000-000" inputmode="numeric" maxlength="9"></div>
         <div class="fg"><label>📌 Nome da Cidade *</label><input type="text" id="f-cidade" placeholder="Ex: Maceió"></div>
       </div>
       <div class="frow">
@@ -3489,17 +3494,17 @@ function gerarCV() {
 
     const { pct, camposPreenchidos, totalCampos } = calcularProgresso();
 
-    // Atualizar barra
-    document.getElementById('rp-fill').style.width = pct + '%';
+    // Atualizar barra (vertical: preenche de baixo para cima)
+    document.getElementById('rp-fill').style.height = pct + '%';
     document.getElementById('rp-pct').textContent = pct + '%';
     document.getElementById('rp-campos').textContent = `${camposPreenchidos} de ${totalCampos} campos`;
 
     // Gradiente dinâmico da barra
     let cor;
-    if (pct < 30) cor = 'linear-gradient(90deg, #2456A4, #546E8A)';
-    else if (pct < 60) cor = 'linear-gradient(90deg, #2456A4, #FF7A2F)';
-    else if (pct < 90) cor = 'linear-gradient(90deg, #E8621A, #FF7A2F)';
-    else cor = 'linear-gradient(90deg, #25D366, #1da851)';
+    if (pct < 30) cor = 'linear-gradient(0deg, #2456A4, #546E8A)';
+    else if (pct < 60) cor = 'linear-gradient(0deg, #2456A4, #FF7A2F)';
+    else if (pct < 90) cor = 'linear-gradient(0deg, #E8621A, #FF7A2F)';
+    else cor = 'linear-gradient(0deg, #25D366, #1da851)';
     document.getElementById('rp-fill').style.background = cor;
 
     // Mensagem e emoji
@@ -3558,6 +3563,64 @@ function gerarCV() {
     _selOriginal(t);
     setTimeout(iniciarMonitoramento, 400);
   };
+
+})();
+</script>
+
+
+<script>
+// ══ MÁSCARAS DE CAMPOS (Telefone, CEP e Data de Nascimento) ══
+(function() {
+
+  function maskTelefone(v) {
+    v = v.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 10) {
+      v = v.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
+    } else if (v.length > 6) {
+      v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+    } else if (v.length > 2) {
+      v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+    } else if (v.length > 0) {
+      v = v.replace(/^(\d{0,2})/, '($1');
+    }
+    return v;
+  }
+
+  function maskCEP(v) {
+    v = v.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 5) {
+      v = v.replace(/^(\d{5})(\d{0,3}).*/, '$1-$2');
+    }
+    return v;
+  }
+
+  function maskData(v) {
+    v = v.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 4) {
+      v = v.replace(/^(\d{2})(\d{2})(\d{0,4}).*/, '$1/$2/$3');
+    } else if (v.length > 2) {
+      v = v.replace(/^(\d{2})(\d{0,2})/, '$1/$2');
+    }
+    return v;
+  }
+
+  function aplicarMascara(id, fn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function() {
+      const pos = el.selectionStart;
+      const antes = el.value.length;
+      el.value = fn(el.value);
+      const depois = el.value.length;
+      // Mantém o cursor no fim (evita saltos ao digitar em sequência)
+      const novaPos = Math.max(0, pos + (depois - antes));
+      el.setSelectionRange(novaPos, novaPos);
+    });
+  }
+
+  aplicarMascara('f-tel', maskTelefone);
+  aplicarMascara('f-cep', maskCEP);
+  aplicarMascara('f-nasc', maskData);
 
 })();
 </script>
