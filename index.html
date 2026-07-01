@@ -1292,8 +1292,13 @@ a, button, .plano, .faq-item, .step { cursor: none; }
 
 
 /* ══ BARRA DE PROGRESSO EM TEMPO REAL (LATERAL, ACOMPANHA O SCROLL) ══ */
+/* position:absolute + reposicionamento via JS (script "ACOMPANHAR SCROLL NO MOBILE")
+   em vez de position:fixed puro: em muitos navegadores/webviews mobile o fixed
+   "quebra" e passa a rolar junto com a página enquanto o teclado virtual está
+   aberto (campo em foco). O JS mantém o valor de "top" sempre sincronizado com
+   a rolagem real da tela, então a barra acompanha o scroll de forma confiável. */
 .realtime-progress-wrap {
-  position: fixed;
+  position: absolute;
   top: 50%;
   right: 0;
   transform: translateY(-50%);
@@ -1304,7 +1309,7 @@ a, button, .plano, .faq-item, .step { cursor: none; }
   border-radius: 16px 0 0 16px;
   box-shadow: -6px 6px 28px rgba(13,31,60,0.16), 0 4px 20px rgba(13,31,60,0.06);
   padding: 16px 12px;
-  transition: all .3s;
+  transition: background .3s;
 }
 .rp-inner {
   display: flex;
@@ -3622,6 +3627,68 @@ function gerarCV() {
   aplicarMascara('f-cep', maskCEP);
   aplicarMascara('f-nasc', maskData);
 
+})();
+</script>
+
+
+<script>
+// ══ BARRA LATERAL: ACOMPANHAR O SCROLL DE FORMA CONFIÁVEL NO MOBILE ══
+// position:fixed sozinho falha em vários navegadores/webviews de celular
+// (Instagram, WhatsApp, Safari com teclado aberto): o elemento "descola" e
+// passa a rolar junto com a página enquanto o usuário preenche um campo.
+// Aqui usamos position:absolute e recalculamos "top" manualmente a cada
+// evento de scroll/resize/teclado, usando a Visual Viewport API quando
+// disponível para já descontar a área ocupada pelo teclado virtual.
+(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    const wrap = document.getElementById('rp-wrap');
+    if (!wrap) return;
+
+    // Move a barra para ser filha direta do <body>, garantindo que o
+    // position:absolute seja sempre relativo ao documento inteiro.
+    document.body.appendChild(wrap);
+    wrap.style.right = '0px';
+
+    let raf = null;
+    function reposicionar() {
+      if (raf) return;
+      raf = requestAnimationFrame(function() {
+        raf = null;
+        if (wrap.style.display === 'none') return;
+        const vv = window.visualViewport;
+        const alturaVisivel = vv ? vv.height : window.innerHeight;
+        const topoVisivel = vv ? vv.offsetTop : 0;
+        const scrollY = window.scrollY || window.pageYOffset || 0;
+        const centro = scrollY + topoVisivel + (alturaVisivel / 2);
+        wrap.style.top = centro + 'px';
+      });
+    }
+
+    window.addEventListener('scroll', reposicionar, { passive: true });
+    window.addEventListener('resize', reposicionar);
+    window.addEventListener('orientationchange', reposicionar);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', reposicionar);
+      window.visualViewport.addEventListener('scroll', reposicionar);
+    }
+    // Teclado abrindo/fechando ao focar campos também deve recalcular
+    document.addEventListener('focusin', function() { setTimeout(reposicionar, 50); setTimeout(reposicionar, 350); });
+    document.addEventListener('focusout', function() { setTimeout(reposicionar, 50); setTimeout(reposicionar, 350); });
+
+    reposicionar();
+
+    // Quando a barra passa a ser exibida (plano selecionado), recalcula a posição.
+    // Só reage a mudanças de "display" (e não às de "top" que o próprio script
+    // gera), para não entrar num loop de observação infinito.
+    let ultimoDisplay = wrap.style.display;
+    const observer = new MutationObserver(function() {
+      if (wrap.style.display !== ultimoDisplay) {
+        ultimoDisplay = wrap.style.display;
+        reposicionar();
+      }
+    });
+    observer.observe(wrap, { attributes: true, attributeFilter: ['style'] });
+  });
 })();
 </script>
 
