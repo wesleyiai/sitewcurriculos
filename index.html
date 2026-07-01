@@ -1445,6 +1445,24 @@
             margin-bottom: 5px;
         }
 
+        .pag-timer {
+            background: linear-gradient(135deg, #EAF2FF, #F5F9FF);
+            border: 1px solid rgba(36, 86, 164, .2);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: .92rem;
+            font-weight: 700;
+            color: var(--azul3);
+        }
+
+        .pag-timer #pag-timer-count {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.15rem;
+            color: var(--azul);
+        }
+
         #btn-confirmar {
             width: 100%;
             padding: 17px;
@@ -1456,135 +1474,17 @@
             font-weight: 800;
             cursor: pointer;
             transition: .25s;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             gap: 10px;
             box-shadow: 0 8px 24px rgba(37, 211, 102, .3);
+            animation: fadeInUp .3s ease;
         }
 
         #btn-confirmar:hover {
             background: #1da851;
             transform: translateY(-2px);
-        }
-
-        /* ══ MODAL ══ */
-        .modal-ov {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(7, 15, 30, .75);
-            z-index: 3000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(8px);
-        }
-
-        .modal-ov.ativo {
-            display: flex;
-        }
-
-        .modal {
-            background: #fff;
-            border-radius: 24px;
-            padding: 44px 38px;
-            max-width: 480px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 24px 80px rgba(0, 0, 0, .3);
-            animation: slideUp .3s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(40px);
-                opacity: 0
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1
-            }
-        }
-
-        .modal h3 {
-            font-family: 'Sora', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 900;
-            color: var(--azul);
-            margin-bottom: 10px;
-        }
-
-        .modal p {
-            color: var(--sub);
-            font-size: .92rem;
-            margin-bottom: 24px;
-            line-height: 1.6;
-        }
-
-        .drop-comp {
-            border: 2px dashed var(--borda);
-            border-radius: 14px;
-            padding: 32px;
-            cursor: pointer;
-            transition: .25s;
-            margin-bottom: 20px;
-        }
-
-        .drop-comp:hover {
-            border-color: var(--azul3);
-            background: #f0f5ff;
-        }
-
-        .drop-comp input {
-            display: none;
-        }
-
-        #prev-comp {
-            max-width: 100%;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            display: none;
-        }
-
-        #btn-env-comp {
-            width: 100%;
-            padding: 15px;
-            background: #25D366;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 800;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: .2s;
-        }
-
-        #btn-env-comp:hover {
-            background: #1da851;
-        }
-
-        #btn-fecha-modal {
-            width: 100%;
-            padding: 13px;
-            background: transparent;
-            color: var(--sub);
-            border: 1.5px solid var(--borda);
-            border-radius: 12px;
-            font-size: .9rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: .2s;
-        }
-
-        #btn-fecha-modal:hover {
-            background: var(--cinza);
         }
 
         /* ══ SUCESSO ══ */
@@ -2007,10 +1907,6 @@
 
             .suc-card {
                 padding: 40px 24px;
-            }
-
-            .modal {
-                padding: 28px 20px;
             }
 
             .escol-row {
@@ -3180,24 +3076,6 @@
 
             .faq-item.aberto .faq-a {
                 padding: 0 18px 16px;
-            }
-
-            /* MODAL */
-            .modal-ov {
-                padding: 12px;
-            }
-
-            .modal {
-                padding: 28px 20px;
-                border-radius: 18px;
-            }
-
-            .modal h3 {
-                font-size: 1.2rem;
-            }
-
-            .drop-comp {
-                padding: 24px;
             }
 
             /* SUCESSO */
@@ -5500,7 +5378,8 @@
             <div class="dep-card">
                 <div class="dep-stars">★★★★★</div>
                 <p class="dep-text">"Atendimento rápido e currículo muito profissional! A equipe foi super atenciosa e o
-                    <em>resultado ficou incrível</em>. Com certeza vou indicar pra todo mundo!"</p>
+                    <em>resultado ficou incrível</em>. Com certeza vou indicar pra todo mundo!"
+                </p>
                 <div class="dep-autor">
                     <div class="dep-avatar-placeholder">👨‍💼</div>
                     <div>
@@ -6013,17 +5892,20 @@
                         <li>Abra o app do seu banco</li>
                         <li>Acesse PIX → Copia e Cola</li>
                         <li>Cole a chave acima e confirme o valor</li>
-                        <li>Tire print do comprovante e clique abaixo</li>
+                        <li>Aguarde a confirmação abaixo</li>
                     </ol>
                 </div>
-                <button id="btn-confirmar" onclick="abrirModal()">
+                <div class="pag-timer" id="pag-timer">
+                    ⏳ Você tem <span id="pag-timer-count">5:00</span> para concluir o pagamento
+                </div>
+                <button id="btn-confirmar" onclick="confirmarPagamento()">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
                         <path
                             d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                         <path
                             d="M11.998 0C5.373 0 0 5.373 0 11.998c0 2.117.554 4.099 1.523 5.82L.057 23.521l5.83-1.527A11.95 11.95 0 0 0 12 24c6.625 0 12-5.373 12-12 0-6.626-5.375-12.002-12.002-12.002z" />
                     </svg>
-                    Já paguei – Enviar comprovante
+                    Já paguei
                 </button>
             </div>
         </div>
@@ -6034,7 +5916,7 @@
         <div class="suc-card">
             <div class="suc-anim">🎉</div>
             <h2>Pedido recebido!</h2>
-            <p>Seu comprovante foi enviado para a nossa equipe. Assim que confirmarmos o pagamento, seu currículo em PDF
+            <p>Sua confirmação de pagamento foi enviada para a nossa equipe. Assim que validarmos, seu currículo em PDF
                 chegará direto no seu WhatsApp!</p>
             <div class="prazo">⏱️ Prazo: até <strong>&nbsp;2 horas&nbsp;</strong> após confirmação</div>
             <br>
@@ -6064,34 +5946,6 @@
             </div>
         </div>
     </section>
-
-    <!-- MODAL COMPROVANTE -->
-    <div class="modal-ov" id="modal">
-        <div class="modal">
-            <div style="font-size:3rem;margin-bottom:12px">📎</div>
-            <h3>Enviar comprovante</h3>
-            <p>Envie o print do comprovante PIX. Nossa equipe confirma e entrega seu currículo no WhatsApp.</p>
-            <div class="drop-comp" onclick="document.getElementById('inp-comp').click()">
-                <img id="prev-comp" src="" alt="">
-                <div id="ph-comp">
-                    <div style="font-size:2rem">📷</div>
-                    <p style="color:var(--sub);margin-top:8px;font-size:.85rem">Clique para selecionar<br><small>JPG ou
-                            PNG</small></p>
-                </div>
-                <input type="file" id="inp-comp" accept="image/*" onchange="prevComp(event)">
-            </div>
-            <button id="btn-env-comp" onclick="enviarComprovante()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                    <path
-                        d="M11.998 0C5.373 0 0 5.373 0 11.998c0 2.117.554 4.099 1.523 5.82L.057 23.521l5.83-1.527A11.95 11.95 0 0 0 12 24c6.625 0 12-5.373 12-12 0-6.626-5.375-12.002-12.002-12.002z" />
-                </svg>
-                Enviar pelo WhatsApp
-            </button>
-            <button id="btn-fecha-modal" onclick="fecharModal()">Cancelar</button>
-        </div>
-    </div>
 
     <!-- FOOTER -->
 
@@ -6185,8 +6039,8 @@
                     <span class="faq-q-text">💳 Como funciona o pagamento?</span>
                     <div class="faq-icon">+</div>
                 </div>
-                <div class="faq-a">O pagamento é feito via <strong>PIX</strong>, rápido e seguro. Após pagar, você envia
-                    o comprovante pelo WhatsApp e nossa equipe confirma e inicia seu currículo imediatamente.</div>
+                <div class="faq-a">O pagamento é feito via <strong>PIX</strong>, rápido e seguro. Após pagar, basta clicar
+                    em "Já paguei" e confirmar pelo WhatsApp — nossa equipe valida e inicia seu currículo imediatamente.</div>
             </div>
 
             <div class="faq-item" onclick="toggleFaq(this)">
@@ -6506,18 +6360,33 @@
             });
         }
 
-        function abrirModal() { document.getElementById('modal').classList.add('ativo'); }
-        function fecharModal() { document.getElementById('modal').classList.remove('ativo'); }
+        let pagTimerInterval = null;
 
-        function prevComp(e) {
-            const f = e.target.files[0]; if (!f || !f.type.startsWith('image/')) return;
-            const r = new FileReader();
-            r.onload = ev => {
-                const i = document.getElementById('prev-comp');
-                i.src = ev.target.result; i.style.display = 'block';
-                document.getElementById('ph-comp').style.display = 'none';
-            };
-            r.readAsDataURL(f);
+        function formatarPagTimer(s) {
+            const m = Math.floor(s / 60), sec = s % 60;
+            return `${m}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        // Contagem de 5min para o cliente pagar; o botão "Já paguei" só
+        // aparece depois dos primeiros 10s, dando tempo do PIX cair.
+        function iniciarTimerPagamento() {
+            clearInterval(pagTimerInterval);
+            const DURACAO = 5 * 60, ESPERA_BOTAO = 10;
+            let restante = DURACAO;
+            const elCount = document.getElementById('pag-timer-count');
+            const btn = document.getElementById('btn-confirmar');
+            btn.style.display = 'none';
+            elCount.textContent = formatarPagTimer(restante);
+            pagTimerInterval = setInterval(() => {
+                restante--;
+                elCount.textContent = formatarPagTimer(Math.max(restante, 0));
+                if (restante <= DURACAO - ESPERA_BOTAO) {
+                    btn.style.display = 'flex';
+                }
+                if (restante <= 0) {
+                    clearInterval(pagTimerInterval);
+                }
+            }, 1000);
         }
 
         function montarMsg() {
@@ -6526,7 +6395,7 @@
             if (d.exps.length) d.exps.forEach((e, i) => { expTxt += `\n   ${i + 1}. ${e.empresa} | ${e.cargo} | ${e.periodo}`; });
             else expTxt = ' Sem experiência informada';
             return encodeURIComponent(
-                `Olá, WCurrículos! 👋\n\nRealizei o pagamento do *${p.nome}* (R$ ${p.preco}).\n\n📋 *DADOS PESSOAIS:*\n👤 ${d.nome}\n🎂 ${d.nasc}\n📧 ${d.email}\n📱 ${d.tel}\n\n📍 *ENDEREÇO:*\n${d.bairro}, ${d.cidade} – ${d.estado} | CEP: ${d.cep}\n\n🎓 *ESCOLARIDADE:*\nFundamental: ${d.fund}\nMédio: ${d.medio}\n${d.superior ? 'Superior: ' + d.superior : ''}\n\n💼 *EXPERIÊNCIAS:*${expTxt}\n\n📚 *CURSOS:*\n${d.cursos}\n\n⚡ *QUALIDADES:*\n${d.qual}\n\n🚗 *CNH:* ${d.cnh}\n\nSegue o comprovante em anexo. Aguardo meu currículo! 😊`
+                `Olá, WCurrículos! 👋\n\nRealizei o pagamento do *${p.nome}* (R$ ${p.preco}).\n\n📋 *DADOS PESSOAIS:*\n👤 ${d.nome}\n🎂 ${d.nasc}\n📧 ${d.email}\n📱 ${d.tel}\n\n📍 *ENDEREÇO:*\n${d.bairro}, ${d.cidade} – ${d.estado} | CEP: ${d.cep}\n\n🎓 *ESCOLARIDADE:*\nFundamental: ${d.fund}\nMédio: ${d.medio}\n${d.superior ? 'Superior: ' + d.superior : ''}\n\n💼 *EXPERIÊNCIAS:*${expTxt}\n\n📚 *CURSOS:*\n${d.cursos}\n\n⚡ *QUALIDADES:*\n${d.qual}\n\n🚗 *CNH:* ${d.cnh}\n\nAguardo meu currículo! 😊`
             );
         }
 
@@ -6552,11 +6421,11 @@
             else document.getElementById('cv-exp-s').innerHTML = '<div class="cv-mt">💼 Experiência Profissional</div><p style="color:var(--sub);font-size:9pt">Sem experiências anteriores informadas.</p>';
         }
 
-        function enviarComprovante() {
+        function confirmarPagamento() {
+            clearInterval(pagTimerInterval);
             enviarForms(dados);
             const msg = montarMsg();
             window.open(`https://wa.me/${WPP}?text=${msg}`, '_blank');
-            fecharModal();
             // gerarCV() é a versão redefinida mais abaixo (gerarEEnviarCV): gera o PDF
             // com o modelo certo (Básico/Premium, já com a logo) e envia por e-mail.
             gerarCV();
@@ -6572,7 +6441,7 @@
                 }
             }
             setTimeout(() => s.scrollIntoView({ behavior: 'smooth' }), 300);
-            const msg2 = encodeURIComponent(`Olá! Enviei o comprovante do *${planos[plano].nome}*. Meu WhatsApp é ${dados.tel}. Aguardo! 😊`);
+            const msg2 = encodeURIComponent(`Olá! Já paguei o *${planos[plano].nome}*. Meu WhatsApp é ${dados.tel}. Aguardo! 😊`);
             document.getElementById('btn-wpp-suc').href = `https://wa.me/${WPP}?text=${msg2}`;
         }
     </script>
@@ -7814,6 +7683,8 @@
                 const sp = document.getElementById('secao-pagamento');
                 sp.style.display = 'block';
                 setTimeout(() => sp.scrollIntoView({ behavior: 'smooth' }), 100);
+
+                iniciarTimerPagamento();
 
                 // Atualizar progresso
                 if (typeof atualizarProgress === 'function') atualizarProgress(3);
