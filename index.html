@@ -1380,6 +1380,215 @@ a, button, .plano, .faq-item, .step { cursor: none; }
   .rp-pct { font-size: .9rem; min-width: 36px; }
 }
 
+
+/* ══ TELA DE COMPARTILHAMENTO ══ */
+#secao-compartilhar {
+  display: none;
+  background: linear-gradient(160deg, #060E1C 0%, #0D1F3C 100%);
+  min-height: 100vh;
+  padding: 60px 32px;
+  position: relative;
+  overflow: hidden;
+}
+#secao-compartilhar::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+.share-wrap {
+  max-width: 620px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+/* Header da seção */
+.share-header { text-align: center; margin-bottom: 36px; }
+.share-rocket {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 16px;
+  animation: rocketBounce 1.5s ease-in-out infinite;
+}
+@keyframes rocketBounce {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+.share-titulo {
+  font-family: 'Sora', sans-serif;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 900; color: #fff;
+  line-height: 1.15; margin-bottom: 12px;
+}
+.share-titulo span { color: var(--laranja2); }
+.share-desc {
+  font-size: .95rem; color: rgba(255,255,255,.6);
+  line-height: 1.7; max-width: 480px; margin: 0 auto;
+}
+/* Card principal */
+.share-card {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 24px;
+  padding: 32px 28px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+/* Barra de progresso de compartilhamentos */
+.share-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.share-progress-label {
+  font-size: .82rem; font-weight: 700;
+  color: rgba(255,255,255,.7);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.share-progress-count {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.1rem; font-weight: 900; color: #fff;
+}
+.share-progress-count span { color: var(--laranja2); }
+.share-bar-track {
+  height: 12px; background: rgba(255,255,255,.08);
+  border-radius: 100px; overflow: hidden; margin-bottom: 24px;
+  border: 1px solid rgba(255,255,255,.06);
+}
+.share-bar-fill {
+  height: 100%; border-radius: 100px; width: 0%;
+  background: linear-gradient(90deg, var(--azul3), var(--laranja2));
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+  position: relative; overflow: hidden;
+}
+.share-bar-fill::after {
+  content: '';
+  position: absolute; top:0; left:-100%; bottom:0; width:60%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+  animation: shareShine 2s infinite;
+}
+@keyframes shareShine { 0%{left:-100%} 100%{left:200%} }
+/* Itens de compartilhamento */
+.share-itens { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.share-item {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,.04);
+  border: 1.5px solid rgba(255,255,255,.08);
+  border-radius: 14px; padding: 14px 18px;
+  transition: all .25s; cursor: pointer;
+  position: relative; overflow: hidden;
+}
+.share-item::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,.03));
+  opacity: 0; transition: opacity .25s;
+}
+.share-item:hover::before { opacity: 1; }
+.share-item:hover { border-color: rgba(255,255,255,.2); transform: translateX(4px); }
+.share-item.compartilhado {
+  border-color: #25D366 !important;
+  background: rgba(37,211,102,.08) !important;
+}
+.share-item.compartilhado:hover { transform: none; cursor: default; }
+.share-item-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; flex-shrink: 0;
+}
+.share-item-info { flex: 1; }
+.share-item-nome { font-size: .92rem; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.share-item-desc { font-size: .75rem; color: rgba(255,255,255,.45); }
+.share-item-status {
+  font-size: .75rem; font-weight: 700;
+  padding: 4px 12px; border-radius: 100px;
+  background: rgba(255,255,255,.08); color: rgba(255,255,255,.5);
+  transition: all .3s; white-space: nowrap;
+}
+.share-item.compartilhado .share-item-status {
+  background: rgba(37,211,102,.2); color: #25D366;
+}
+.share-item.aguardando .share-item-status {
+  background: rgba(255,122,47,.15); color: var(--laranja2);
+  animation: pulseStatus 1.5s infinite;
+}
+@keyframes pulseStatus { 0%,100%{opacity:1} 50%{opacity:.5} }
+/* Box de incentivo */
+.share-incentivo {
+  background: linear-gradient(135deg, rgba(232,98,26,.1), rgba(255,122,47,.08));
+  border: 1px solid rgba(232,98,26,.25);
+  border-radius: 14px; padding: 16px 20px;
+  display: flex; align-items: center; gap: 14px;
+}
+.share-incentivo .inc-icon { font-size: 1.8rem; flex-shrink: 0; }
+.share-incentivo p { font-size: .85rem; color: rgba(255,255,255,.75); line-height: 1.6; margin: 0; }
+.share-incentivo strong { color: var(--laranja2); }
+/* Botão de prosseguir (bloqueado inicialmente) */
+.share-btn-prosseguir {
+  width: 100%; padding: 18px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.3);
+  border: 1.5px solid rgba(255,255,255,.08);
+  border-radius: 14px; font-size: 1.05rem; font-weight: 800;
+  cursor: not-allowed; transition: all .4s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-top: 20px; letter-spacing: .3px;
+}
+.share-btn-prosseguir.liberado {
+  background: linear-gradient(135deg, var(--laranja), var(--laranja2));
+  color: #fff; border-color: transparent;
+  cursor: pointer; box-shadow: 0 8px 32px rgba(232,98,26,.4);
+  animation: liberadoPulse .6s ease;
+}
+.share-btn-prosseguir.liberado:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(232,98,26,.55); }
+@keyframes liberadoPulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+/* Timer de validação */
+.share-timer {
+  display: none; text-align: center;
+  font-size: .78rem; color: rgba(255,255,255,.4);
+  margin-top: 10px;
+}
+/* TELA DE CELEBRAÇÃO */
+.share-celebracao {
+  display: none; text-align: center;
+  padding: 20px; animation: fadeInUp .5s ease;
+}
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.celebracao-emoji { font-size: 5rem; margin-bottom: 16px; display: block; animation: celebBounce .6s ease; }
+@keyframes celebBounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.3)} }
+.celebracao-titulo {
+  font-family: 'Sora', sans-serif; font-size: 1.8rem;
+  font-weight: 900; color: #fff; margin-bottom: 10px;
+}
+.celebracao-sub { color: rgba(255,255,255,.6); font-size: .95rem; margin-bottom: 28px; }
+/* Confetes */
+.confete-wrap { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.confete {
+  position: absolute; width: 10px; height: 10px;
+  border-radius: 2px; opacity: 0;
+  animation: confeteQueda linear forwards;
+}
+@keyframes confeteQueda {
+  0%   { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+}
+@media(max-width:640px){
+  #secao-compartilhar { padding: 40px 16px; }
+  .share-card { padding: 24px 18px; }
+  .share-item { padding: 12px 14px; }
+  .share-item-icon { width: 40px; height: 40px; font-size: 1.2rem; }
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
@@ -1913,6 +2122,110 @@ a, button, .plano, .faq-item, .step { cursor: none; }
 </section>
 
 <!-- PAGAMENTO -->
+
+<!-- ══ TELA DE COMPARTILHAMENTO ══ -->
+<section id="secao-compartilhar">
+  <div class="confete-wrap" id="confete-wrap"></div>
+  <div class="share-wrap">
+
+    <!-- HEADER -->
+    <div class="share-header" id="share-header">
+      <span class="share-rocket">🚀</span>
+      <h2 class="share-titulo">Falta só <span>mais um passo!</span></h2>
+      <p class="share-desc">
+        Compartilhe o site com <strong style="color:var(--laranja2)">2 pessoas</strong> e ajude mais gente a conquistar um emprego com um currículo profissional.
+        Após concluir, seu pagamento será liberado automaticamente!
+      </p>
+    </div>
+
+    <!-- CARD PRINCIPAL -->
+    <div class="share-card" id="share-card-principal">
+
+      <!-- Progresso -->
+      <div class="share-progress-header">
+        <div class="share-progress-label">Compartilhamentos</div>
+        <div class="share-progress-count"><span id="share-count">0</span> de 2 concluídos</div>
+      </div>
+      <div class="share-bar-track">
+        <div class="share-bar-fill" id="share-bar"></div>
+      </div>
+
+      <!-- Itens de compartilhamento -->
+      <div class="share-itens">
+
+        <!-- WhatsApp -->
+        <div class="share-item" id="share-wpp" onclick="compartilhar('wpp')">
+          <div class="share-item-icon" style="background:rgba(37,211,102,.15);">💬</div>
+          <div class="share-item-info">
+            <div class="share-item-nome">WhatsApp</div>
+            <div class="share-item-desc">Compartilhe com amigos e familiares</div>
+          </div>
+          <div class="share-item-status" id="status-wpp">Compartilhar →</div>
+        </div>
+
+        <!-- Telegram -->
+        <div class="share-item" id="share-tg" onclick="compartilhar('tg')">
+          <div class="share-item-icon" style="background:rgba(36,161,222,.15);">✈️</div>
+          <div class="share-item-info">
+            <div class="share-item-nome">Telegram</div>
+            <div class="share-item-desc">Envie para seus grupos e contatos</div>
+          </div>
+          <div class="share-item-status" id="status-tg">Compartilhar →</div>
+        </div>
+
+        <!-- Facebook -->
+        <div class="share-item" id="share-fb" onclick="compartilhar('fb')">
+          <div class="share-item-icon" style="background:rgba(24,119,242,.15);">👍</div>
+          <div class="share-item-info">
+            <div class="share-item-nome">Facebook</div>
+            <div class="share-item-desc">Poste no seu perfil ou grupos</div>
+          </div>
+          <div class="share-item-status" id="status-fb">Compartilhar →</div>
+        </div>
+
+        <!-- Copiar link -->
+        <div class="share-item" id="share-link" onclick="compartilhar('link')">
+          <div class="share-item-icon" style="background:rgba(255,122,47,.15);">🔗</div>
+          <div class="share-item-info">
+            <div class="share-item-nome">Copiar link</div>
+            <div class="share-item-desc">Cole em qualquer lugar que quiser</div>
+          </div>
+          <div class="share-item-status" id="status-link">Copiar →</div>
+        </div>
+
+      </div><!-- /share-itens -->
+
+      <!-- Box de incentivo -->
+      <div class="share-incentivo">
+        <span class="inc-icon">💡</span>
+        <p>"Ajude um amigo a conquistar uma oportunidade de emprego. <strong>Um currículo profissional pode mudar uma vida.</strong> Compartilhe e faça a diferença!"</p>
+      </div>
+
+      <!-- Timer de espera -->
+      <div class="share-timer" id="share-timer">
+        ⏳ Aguardando confirmação do compartilhamento... <span id="share-timer-count">5</span>s
+      </div>
+
+    </div><!-- /share-card -->
+
+    <!-- TELA DE CELEBRAÇÃO (aparece após 2 compartilhamentos) -->
+    <div class="share-celebracao" id="share-celebracao">
+      <span class="celebracao-emoji">🎉</span>
+      <div class="celebracao-titulo">Muito obrigado!</div>
+      <p class="celebracao-sub">
+        Você ajudou mais pessoas a conhecerem a WCurrículos!<br>
+        Agora é a sua vez — vamos finalizar seu currículo!
+      </p>
+    </div>
+
+    <!-- BOTÃO PROSSEGUIR -->
+    <button class="share-btn-prosseguir" id="share-btn-prosseguir" disabled onclick="irParaPagamento()">
+      🔒 Complete os compartilhamentos para prosseguir
+    </button>
+
+  </div><!-- /share-wrap -->
+</section>
+
 <section class="section" id="secao-pagamento">
   <div style="text-align:center;margin-bottom:40px"><div class="eyebrow">Etapa 3 de 3</div>
   <h2 class="s-title">Pagamento via PIX</h2>
@@ -3247,6 +3560,306 @@ function gerarCV() {
   };
 
 })();
+</script>
+
+
+<script>
+// ══════════════════════════════════════════════
+// SISTEMA DE COMPARTILHAMENTO INTELIGENTE
+// ══════════════════════════════════════════════
+(function() {
+
+  const SITE_URL   = 'https://wesleyiai.github.io/sitewcurriculos/'; // Altere para sua URL real
+  const SITE_NOME  = 'WCurrículos';
+  const MSG_SHARE  = encodeURIComponent(
+    '🚀 Precisa de um currículo profissional? Acabei de conhecer o WCurrículos! ' +
+    'Eles fazem currículos modernos em PDF e entregam direto no WhatsApp, a partir de R$19,90. ' +
+    'Acesse e solicite o seu: ' + SITE_URL
+  );
+
+  // Estado do compartilhamento
+  let compartilhamentos = {
+    wpp:  { feito: false, aguardando: false, timer: null },
+    tg:   { feito: false, aguardando: false, timer: null },
+    fb:   { feito: false, aguardando: false, timer: null },
+    link: { feito: false, aguardando: false, timer: null },
+  };
+  let totalCompartilhado = 0;
+  let liberado = false;
+
+  // ── MOSTRAR TELA DE COMPARTILHAMENTO ──
+  window.mostrarCompartilhamento = function() {
+    const sec = document.getElementById('secao-compartilhar');
+    sec.style.display = 'block';
+    setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  };
+
+  // ── LÓGICA DE COMPARTILHAMENTO ──
+  window.compartilhar = function(tipo) {
+    const item = compartilhamentos[tipo];
+    if (item.feito || item.aguardando) return;
+
+    // Abrir a rede social
+    const urls = {
+      wpp:  `https://wa.me/?text=${MSG_SHARE}`,
+      tg:   `https://t.me/share/url?url=${encodeURIComponent(SITE_URL)}&text=${MSG_SHARE}`,
+      fb:   `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}`,
+      link: null,
+    };
+
+    if (tipo === 'link') {
+      // Copiar link
+      navigator.clipboard.writeText(SITE_URL).then(() => {
+        const el = document.getElementById('share-link');
+        const st = document.getElementById('status-link');
+        el.classList.add('aguardando');
+        st.textContent = '⏳ Aguardando... 8s';
+        item.aguardando = true;
+        mostrarTimer(tipo, 8);
+      });
+    } else {
+      window.open(urls[tipo], '_blank');
+      const el = document.getElementById('share-' + tipo);
+      const st = document.getElementById('status-' + tipo);
+      el.classList.add('aguardando');
+      st.textContent = '⏳ Aguardando... 10s';
+      item.aguardando = true;
+      mostrarTimer(tipo, 10);
+    }
+  };
+
+  // ── TIMER DE VALIDAÇÃO INTELIGENTE ──
+  function mostrarTimer(tipo, segundos) {
+    const timerEl = document.getElementById('share-timer');
+    const timerCount = document.getElementById('share-timer-count');
+    timerEl.style.display = 'block';
+
+    let restante = segundos;
+    timerCount.textContent = restante;
+
+    const stEl = document.getElementById('status-' + tipo);
+
+    const intervalo = setInterval(() => {
+      restante--;
+      timerCount.textContent = restante;
+      stEl.textContent = `⏳ Confirmando... ${restante}s`;
+
+      if (restante <= 0) {
+        clearInterval(intervalo);
+        confirmarCompartilhamento(tipo);
+        timerEl.style.display = 'none';
+      }
+    }, 1000);
+
+    compartilhamentos[tipo].timer = intervalo;
+  }
+
+  // ── CONFIRMAR COMPARTILHAMENTO ──
+  function confirmarCompartilhamento(tipo) {
+    const item = compartilhamentos[tipo];
+    if (item.feito) return;
+
+    item.feito = true;
+    item.aguardando = false;
+    totalCompartilhado++;
+
+    const el = document.getElementById('share-' + tipo);
+    const st = document.getElementById('status-' + tipo);
+
+    el.classList.remove('aguardando');
+    el.classList.add('compartilhado');
+    el.onclick = null;
+
+    // Animação de check
+    st.innerHTML = '✅ Concluído!';
+
+    // Mini confete ao confirmar cada um
+    lancarConfetesMini();
+
+    // Atualizar barra de progresso
+    atualizarProgressoShare();
+
+    // Verificar se atingiu 2
+    if (totalCompartilhado >= 2 && !liberado) {
+      liberado = true;
+      setTimeout(mostrarCelebracao, 400);
+    }
+  }
+
+  // ── ATUALIZAR PROGRESSO ──
+  function atualizarProgressoShare() {
+    const pct = Math.min((totalCompartilhado / 2) * 100, 100);
+    document.getElementById('share-bar').style.width = pct + '%';
+    document.getElementById('share-count').textContent = Math.min(totalCompartilhado, 2);
+
+    // Gradiente da barra conforme progresso
+    if (pct < 50) {
+      document.getElementById('share-bar').style.background =
+        'linear-gradient(90deg, #2456A4, #FF7A2F)';
+    } else {
+      document.getElementById('share-bar').style.background =
+        'linear-gradient(90deg, #25D366, #1da851)';
+    }
+  }
+
+  // ── CELEBRAÇÃO ──
+  function mostrarCelebracao() {
+    // Esconder card principal
+    document.getElementById('share-card-principal').style.opacity = '0.5';
+
+    // Mostrar celebração
+    const celeb = document.getElementById('share-celebracao');
+    celeb.style.display = 'block';
+
+    // Lançar confetes
+    lancarConfetes();
+
+    // Liberar botão após 1.5s
+    setTimeout(() => {
+      const btn = document.getElementById('share-btn-prosseguir');
+      btn.disabled = false;
+      btn.classList.add('liberado');
+      btn.innerHTML = '🎉 Prosseguir para o pagamento →';
+    }, 1500);
+  }
+
+  // ── CONFETES ══
+  function lancarConfetes() {
+    const wrap = document.getElementById('confete-wrap');
+    const cores = ['#E8621A','#FF7A2F','#F5A623','#25D366','#2456A4','#fff','#FFD700'];
+    for (let i = 0; i < 80; i++) {
+      const el = document.createElement('div');
+      el.className = 'confete';
+      el.style.cssText = `
+        left: ${Math.random()*100}%;
+        top: -20px;
+        background: ${cores[Math.floor(Math.random()*cores.length)]};
+        width: ${Math.random()*10+6}px;
+        height: ${Math.random()*10+6}px;
+        border-radius: ${Math.random()>0.5?'50%':'2px'};
+        animation-duration: ${Math.random()*2+2}s;
+        animation-delay: ${Math.random()*1.5}s;
+      `;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+  }
+
+  function lancarConfetesMini() {
+    const wrap = document.getElementById('confete-wrap');
+    const cores = ['#E8621A','#FF7A2F','#25D366','#fff'];
+    for (let i = 0; i < 20; i++) {
+      const el = document.createElement('div');
+      el.className = 'confete';
+      el.style.cssText = `
+        left: ${30+Math.random()*40}%;
+        top: ${30+Math.random()*20}%;
+        background: ${cores[Math.floor(Math.random()*cores.length)]};
+        width: ${Math.random()*8+4}px;
+        height: ${Math.random()*8+4}px;
+        animation-duration: ${Math.random()*1+1}s;
+        animation-delay: 0s;
+      `;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }
+  }
+
+  // ── IR PARA PAGAMENTO ──
+  window.irParaPagamento = function() {
+    if (!liberado) return;
+
+    // Esconder compartilhamento
+    document.getElementById('secao-compartilhar').style.display = 'none';
+
+    // Montar tela de pagamento (código original)
+    const p = planos[plano];
+    document.getElementById('pag-tag').textContent = p.nome;
+    document.getElementById('pag-valor').textContent = p.preco;
+    document.getElementById('qrcode-container').innerHTML = '';
+    new QRCode(document.getElementById('qrcode-container'), {
+      text: PIX, width: 180, height: 180,
+      colorDark: '#0D1F3C', colorLight: '#fff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    const sp = document.getElementById('secao-pagamento');
+    sp.style.display = 'block';
+    setTimeout(() => sp.scrollIntoView({ behavior: 'smooth' }), 100);
+
+    // Atualizar progresso
+    if (typeof atualizarProgress === 'function') atualizarProgress(3);
+  };
+
+})();
+
+// ══ INTERCEPTAR validarForm PARA IR AO COMPARTILHAMENTO PRIMEIRO ══
+document.addEventListener('DOMContentLoaded', function() {
+  const _validarOriginal = validarForm;
+
+  validarForm = function() {
+    // Rodar validação original mas interceptar antes de mostrar pagamento
+    const nome   = document.getElementById('f-nome').value.trim();
+    const nasc   = document.getElementById('f-nasc').value.trim();
+    const email  = document.getElementById('f-email').value.trim();
+    const tel    = document.getElementById('f-tel').value.trim();
+    const cep    = document.getElementById('f-cep').value.trim();
+    const cidade = document.getElementById('f-cidade').value.trim();
+    const bairro = document.getElementById('f-bairro').value.trim();
+    const estado = document.getElementById('f-estado').value.trim();
+    const qual   = document.getElementById('f-qual').value.trim();
+    const cursos = document.getElementById('f-cursos').value.trim();
+    const cnh    = document.querySelector('input[name="cnh"]:checked');
+
+    if (!nome)   { alert('Informe seu nome completo.'); return; }
+    if (!nasc)   { alert('Informe sua data de nascimento.'); return; }
+    if (!email)  { alert('Informe seu e-mail.'); return; }
+    if (!tel)    { alert('Informe seu WhatsApp.'); return; }
+    if (!cep)    { alert('Informe seu CEP.'); return; }
+    if (!cidade) { alert('Informe o nome da sua cidade.'); return; }
+    if (!bairro) { alert('Informe seu bairro.'); return; }
+    if (!estado) { alert('Informe seu estado.'); return; }
+    if (!qual)   { alert('Informe suas qualidades.'); return; }
+    if (!cursos) { alert('Informe os cursos (ou escreva "Nenhum").'); return; }
+    if (!cnh)    { alert('Selecione sua situação de CNH.'); return; }
+    if (plano === 'premium') {
+      const foto = document.getElementById('prev-foto').src;
+      if (!foto || !foto.startsWith('data:image')) {
+        alert('O plano Premium requer uma foto.'); return;
+      }
+    }
+
+    // Coletar dados (igual ao original)
+    const fund  = document.querySelector('input[name="fund"]:checked');
+    const med   = document.querySelector('input[name="medio"]:checked');
+    const emps  = [...document.querySelectorAll('.exp-emp')];
+    const pers  = [...document.querySelectorAll('.exp-per')];
+    const cars  = [...document.querySelectorAll('.exp-car')];
+    const exps  = [];
+    for (let i = 0; i < 3; i++) {
+      const emp = emps[i]?.value.trim();
+      if (emp) exps.push({ empresa: emp, periodo: pers[i]?.value.trim()||'', cargo: cars[i]?.value.trim()||'' });
+    }
+
+    dados = {
+      nome, nasc, email, tel, cep, cidade, bairro, estado,
+      fund:     fund  ? fund.value  : 'Não informado',
+      medio:    med   ? med.value   : 'Não informado',
+      superior: document.getElementById('f-sup').value.trim(),
+      exps, cursos, qual, cnh: cnh.value,
+      foto: plano === 'premium' ? document.getElementById('prev-foto').src : null
+    };
+
+    // Enviar ao Google Forms
+    if (typeof enviarForms === 'function') enviarForms(dados);
+
+    // ✨ IR PARA COMPARTILHAMENTO (não para pagamento diretamente)
+    mostrarCompartilhamento();
+
+    // Atualizar progress
+    if (typeof atualizarProgress === 'function') atualizarProgress(2);
+  };
+});
 </script>
 
 </body>
