@@ -2746,11 +2746,9 @@ function enviarComprovante(){
   const msg=montarMsg();
   window.open(`https://wa.me/${WPP}?text=${msg}`,'_blank');
   fecharModal();
+  // gerarCV() é a versão redefinida mais abaixo (gerarEEnviarCV): gera o PDF
+  // com o modelo certo (Básico/Premium, já com a logo) e envia por e-mail.
   gerarCV();
-  setTimeout(()=>{
-    const el=document.getElementById('cv-page');
-    html2pdf().set({margin:[0,0,0,0],filename:`curriculo_${dados.nome.replace(/\s+/g,'_')}.pdf`,image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true,logging:false},jsPDF:{unit:'px',format:[794,1123],orientation:'portrait'}}).from(el).save();
-  },800);
   const s=document.getElementById('secao-sucesso');
   s.style.display='block';
   // Mostrar bônus eBook se for Premium
@@ -3314,19 +3312,17 @@ const EMAILJS_KEY      = '5lSeobCVnsOX35Gz3';
 function preencherPremium(d, logoSrc) {
   // Foto
   if (d.foto) {
-    const fi = document.getElementById('cvp-foto-img');
+    const fi = document.getElementById('cvp-foto');
     fi.src = d.foto; fi.style.display = 'block';
     document.getElementById('cvp-foto-ph').style.display = 'none';
   }
   // Logos
-  ['cvp-logo','cvm-logo'].forEach(id => {
+  ['cvp-logo'].forEach(id => {
     const el = document.getElementById(id);
     if (el && logoSrc) el.src = logoSrc;
   });
   // Dados pessoais
   document.getElementById('cvp-nome').textContent  = d.nome;
-  document.getElementById('cvm-nome').textContent  = d.nome;
-  document.getElementById('cvp-cidade-estado').textContent = d.cidade + ' / ' + d.estado;
   document.getElementById('cvp-tel').textContent   = d.tel;
   document.getElementById('cvp-email').textContent = d.email;
   document.getElementById('cvp-nasc').textContent  = d.nasc;
@@ -3343,24 +3339,24 @@ function preencherPremium(d, logoSrc) {
   }
   // Qualidades
   const quals = d.qual.split(/[\n,]+/).map(q=>q.trim()).filter(q=>q);
-  document.getElementById('cvp-quals').innerHTML =
+  document.getElementById('cvp-skills').innerHTML =
     quals.map(q => `<span class="cvp-skill">${q}</span>`).join('');
   // Escolaridade
   let esc = '';
   esc += `<div style="margin-bottom:8px;"><div style="font-size:9.5pt;font-weight:700;color:#0D1F3C;">Ensino Fundamental</div><div style="font-size:8.5pt;color:#546E8A;">${d.fund}</div></div>`;
   esc += `<div style="margin-bottom:8px;"><div style="font-size:9.5pt;font-weight:700;color:#0D1F3C;">Ensino Médio</div><div style="font-size:8.5pt;color:#546E8A;">${d.medio}</div></div>`;
   if (d.superior) esc += `<div><div style="font-size:9.5pt;font-weight:700;color:#0D1F3C;">Ensino Superior</div><div style="font-size:8.5pt;color:#546E8A;">${d.superior}</div></div>`;
-  document.getElementById('cvm-escol').innerHTML = esc;
+  document.getElementById('cvp-escol').innerHTML = esc;
   // Experiências
   if (d.exps && d.exps.length) {
-    document.getElementById('cvm-exp').innerHTML = d.exps.map(e => `
+    document.getElementById('cvp-exp').innerHTML = d.exps.map(e => `
       <div class="cvm-exp-item">
         <div class="cvm-exp-cargo">${e.cargo}</div>
         <div class="cvm-exp-empresa">${e.empresa}</div>
         <div class="cvm-exp-periodo">📅 ${e.periodo}</div>
       </div>`).join('');
   } else {
-    document.getElementById('cvm-exp-sec').innerHTML = '<div style="font-size:9pt;color:#546E8A;">Sem experiências anteriores informadas.</div>';
+    document.getElementById('cvp-exp-sec').innerHTML = '<div style="font-size:9pt;color:#546E8A;">Sem experiências anteriores informadas.</div>';
   }
 }
 
@@ -3374,7 +3370,7 @@ function preencherBasico(d, logoSrc) {
   el('cvb-tel').textContent   = d.tel;
   el('cvb-email').textContent = d.email;
   el('cvb-nasc').textContent  = d.nasc;
-  el('cvb-end').textContent   = d.bairro + ', ' + d.cidade + ' – ' + d.estado;
+  el('cvb-local').textContent = d.bairro + ', ' + d.cidade + ' – ' + d.estado;
   // CNH
   el('cvb-cnh').textContent = d.cnh;
   // Cursos
@@ -3384,7 +3380,7 @@ function preencherBasico(d, logoSrc) {
   } else { el('cvb-cursos-sec').style.display='none'; }
   // Qualidades
   const quals = d.qual.split(/[\n,]+/).map(q=>q.trim()).filter(q=>q);
-  el('cvb-quals').innerHTML = quals.map(q=>`<span class="cvb-qual-tag">${q}</span>`).join('');
+  el('cvb-skills').innerHTML = quals.map(q=>`<span class="cvb-qual-tag">${q}</span>`).join('');
   // Escolaridade
   let esc = '';
   esc += `<div class="cvb-edu-item"><div class="cvb-edu-nivel">Ensino Fundamental</div><div class="cvb-edu-det">${d.fund}</div></div>`;
@@ -3410,7 +3406,7 @@ function preencherBasico(d, logoSrc) {
 function gerarEEnviarCV(d) {
   const isPremium = plano === 'premium';
   const logoSrc = document.getElementById('nav-logo').src;
-  const cvId = isPremium ? 'cv-premium' : 'cv-basico';
+  const cvId = isPremium ? 'cv-premium-page' : 'cv-basico-page';
 
   // Preencher o modelo correto
   if (isPremium) preencherPremium(d, logoSrc);
