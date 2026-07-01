@@ -576,6 +576,41 @@ footer{background:var(--azul);color:rgba(255,255,255,.5);padding:56px 32px 32px;
 .delay-3 { transition-delay: .3s; }
 .delay-4 { transition-delay: .4s; }
 
+/* ══ EFEITOS DE TOQUE PARA CELULAR ══ */
+/* :hover não existe em telas de toque, então replicamos o "feedback" com :active
+   (funciona enquanto o dedo está pressionando) só em dispositivos sem hover real. */
+@media (hover: none) {
+  .btn-main:active, .nav-cta:active, .btn-seguir:active,
+  #btn-confirmar:active, .share-btn-prosseguir:not(:disabled):active,
+  .btn-pl:active, .social-btn:active, .f-social-btn:active,
+  .btn-copiar:active, .urgencia-cta:active {
+    transform: scale(.95);
+    opacity: .92;
+    transition: transform .12s ease, opacity .12s ease;
+  }
+  .plano:active { transform: translateY(-3px) scale(.98); box-shadow: 0 14px 36px rgba(13,31,60,.18); }
+  .step:active .step-circle { border-color: var(--azul3); box-shadow: 0 8px 24px rgba(36,86,164,.18); transform: scale(1.07); }
+  .dep-card:active { background: rgba(255,255,255,.09); transform: scale(.98); }
+  .faq-item:active { border-color: var(--azul3); }
+  .share-item:not(.compartilhado):active { transform: scale(.97); border-color: var(--azul3); }
+  .exemplo-card:active { transform: scale(.98); }
+  .wpp-float-btn:active { transform: scale(1.12); }
+}
+
+/* Ondulação (ripple) ao tocar em botões e cards principais — gerada via JS */
+.tap-ripple-el { position: relative; overflow: hidden; }
+.tap-ripple-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,.5);
+  transform: scale(0);
+  animation: tapRippleAnim .55s ease-out forwards;
+  pointer-events: none;
+  z-index: 5;
+}
+.tap-ripple-circle.escuro { background: rgba(13,31,60,.14); }
+@keyframes tapRippleAnim { to { transform: scale(2.6); opacity: 0; } }
+
 /* ══ SELO DE GARANTIA NOS PLANOS ══ */
 .plano-garantia {
   display: flex; align-items: center; gap: 8px;
@@ -2173,26 +2208,6 @@ a, button, .plano, .faq-item, .step { cursor: none; }
           <div class="share-item-status" id="status-wpp">Compartilhar →</div>
         </div>
 
-        <!-- Telegram -->
-        <div class="share-item" id="share-tg" onclick="compartilhar('tg')">
-          <div class="share-item-icon" style="background:rgba(36,161,222,.15);">✈️</div>
-          <div class="share-item-info">
-            <div class="share-item-nome">Telegram</div>
-            <div class="share-item-desc">Envie para seus grupos e contatos</div>
-          </div>
-          <div class="share-item-status" id="status-tg">Compartilhar →</div>
-        </div>
-
-        <!-- Facebook -->
-        <div class="share-item" id="share-fb" onclick="compartilhar('fb')">
-          <div class="share-item-icon" style="background:rgba(24,119,242,.15);">👍</div>
-          <div class="share-item-info">
-            <div class="share-item-nome">Facebook</div>
-            <div class="share-item-desc">Poste no seu perfil ou grupos</div>
-          </div>
-          <div class="share-item-status" id="status-fb">Compartilhar →</div>
-        </div>
-
         <!-- Copiar link -->
         <div class="share-item" id="share-link" onclick="compartilhar('link')">
           <div class="share-item-icon" style="background:rgba(255,122,47,.15);">🔗</div>
@@ -2581,6 +2596,7 @@ document.getElementById('hero-logo').src=lsrc;
 
 function selecionarPlano(t){
   plano=t;
+  if (window.vibrarToque) window.vibrarToque(12);
   document.querySelectorAll('.plano').forEach(p=>p.classList.remove('sel'));
   document.getElementById('plano-'+t).classList.add('sel');
   const p=planos[t];
@@ -2914,7 +2930,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const seletores = [
     '.step', '.dep-card', '.dep-img-card', '.plano',
     '.faq-item', '.exemplo-card', '.garantia-bar',
-    '.g-item', '.stat', '.hero-stats'
+    '.g-item', '.stat', '.hero-stats', '.fcard', '.share-item'
   ];
   seletores.forEach(sel => {
     document.querySelectorAll(sel).forEach((el, i) => {
@@ -3210,6 +3226,81 @@ validarForm = function() {
   }, { threshold: 0.5 });
   observer.observe(statsSection);
 })();
+
+// ══════════════════════════════════════════════
+// 8. EFEITOS DE TOQUE (RIPPLE + VIBRAÇÃO) PARA CELULAR
+// ══════════════════════════════════════════════
+(function(){
+
+  // Vibração leve em interações-chave (silenciosa se o navegador não suportar)
+  function vibrar(ms){
+    if (navigator.vibrate) { try { navigator.vibrate(ms); } catch(e){} }
+  }
+  window.vibrarToque = vibrar;
+
+  // Efeito "ripple" (ondulação) ao tocar/clicar — dá feedback visual imediato
+  function criarRipple(e, el){
+    const rect = el.getBoundingClientRect();
+    const ponto = (e.touches && e.touches[0]) ? e.touches[0] : e;
+    const x = (ponto.clientX != null ? ponto.clientX : rect.left + rect.width/2) - rect.left;
+    const y = (ponto.clientY != null ? ponto.clientY : rect.top + rect.height/2) - rect.top;
+    const tamanho = Math.max(rect.width, rect.height) * 1.2;
+
+    const circle = document.createElement('span');
+    circle.className = 'tap-ripple-circle' + (el.classList.contains('tap-ripple-escuro') ? ' escuro' : '');
+    circle.style.width  = tamanho + 'px';
+    circle.style.height = tamanho + 'px';
+    circle.style.left = (x - tamanho/2) + 'px';
+    circle.style.top  = (y - tamanho/2) + 'px';
+
+    el.classList.add('tap-ripple-el');
+    el.appendChild(circle);
+    setTimeout(() => circle.remove(), 600);
+  }
+
+  const SELETOR_RIPPLE = '.btn-main, .nav-cta, .btn-seguir, #btn-confirmar, .share-btn-prosseguir, .btn-pl, .plano, .share-item, .btn-copiar, .urgencia-cta, #btn-wpp-suc';
+  const CLARO_MAS_ESCURO = '.btn-pl, .btn-copiar'; // fundo claro nesses -> ripple escuro fica mais visível
+
+  // Alguns navegadores/webviews disparam pointerdown E touchstart para o mesmo
+  // toque; esse "debounce" por elemento evita criar 2 ondulações de uma vez.
+  const ultimoToque = new WeakMap();
+  function comDebounce(fn){
+    return function(e){
+      const el = e.currentTarget;
+      const agora = (window.performance && performance.now) ? performance.now() : Date.now();
+      const anterior = ultimoToque.get(el) || 0;
+      if (agora - anterior < 80) return;
+      ultimoToque.set(el, agora);
+      fn(e, el);
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll(SELETOR_RIPPLE).forEach(el => {
+      if (el.matches(CLARO_MAS_ESCURO)) el.classList.add('tap-ripple-escuro');
+
+      const aoTocar = comDebounce(function(e, alvo){
+        if (alvo.disabled) return;
+        criarRipple(e, alvo);
+      });
+      // pointerdown cobre a maioria dos navegadores modernos; touchstart e
+      // mousedown ficam como reforço para webviews mais antigos (Instagram,
+      // WhatsApp) onde a Pointer Events API pode se comportar de forma irregular.
+      el.addEventListener('pointerdown', aoTocar, { passive: true });
+      el.addEventListener('touchstart', aoTocar, { passive: true });
+      el.addEventListener('mousedown', aoTocar, { passive: true });
+    });
+
+    // Pequena vibração ao tocar nos cards de plano (chamada direta, sem debounce:
+    // vibrar em dobro por 8ms é imperceptível, e usar o mesmo WeakMap do ripple
+    // acima faria essa vibração nunca disparar)
+    document.querySelectorAll('.plano').forEach(el => {
+      el.addEventListener('pointerdown', () => vibrar(8), { passive: true });
+      el.addEventListener('touchstart', () => vibrar(8), { passive: true });
+    });
+  });
+
+})();
 </script>
 
 
@@ -3245,15 +3336,13 @@ function preencherPremium(d, logoSrc) {
   // Cursos
   if (d.cursos && d.cursos !== 'Nenhum') {
     document.getElementById('cvp-cursos').innerHTML =
-      d.cursos.split(/[
-,]+/).filter(c=>c.trim())
+      d.cursos.split(/[\n,]+/).filter(c=>c.trim())
         .map(c => `<div style="font-size:8pt;color:rgba(255,255,255,.8);margin-bottom:3px;">• ${c.trim()}</div>`).join('');
   } else {
     document.getElementById('cvp-cursos-sec').style.display = 'none';
   }
   // Qualidades
-  const quals = d.qual.split(/[,
-]+/).map(q=>q.trim()).filter(q=>q);
+  const quals = d.qual.split(/[\n,]+/).map(q=>q.trim()).filter(q=>q);
   document.getElementById('cvp-quals').innerHTML =
     quals.map(q => `<span class="cvp-skill">${q}</span>`).join('');
   // Escolaridade
@@ -3290,13 +3379,11 @@ function preencherBasico(d, logoSrc) {
   el('cvb-cnh').textContent = d.cnh;
   // Cursos
   if (d.cursos && d.cursos !== 'Nenhum') {
-    el('cvb-cursos').innerHTML = d.cursos.split(/[
-,]+/).filter(c=>c.trim())
+    el('cvb-cursos').innerHTML = d.cursos.split(/[\n,]+/).filter(c=>c.trim())
       .map(c=>`<div class="cvb-skill-item"><div class="cvb-skill-dot"></div>${c.trim()}</div>`).join('');
   } else { el('cvb-cursos-sec').style.display='none'; }
   // Qualidades
-  const quals = d.qual.split(/[,
-]+/).map(q=>q.trim()).filter(q=>q);
+  const quals = d.qual.split(/[\n,]+/).map(q=>q.trim()).filter(q=>q);
   el('cvb-quals').innerHTML = quals.map(q=>`<span class="cvb-qual-tag">${q}</span>`).join('');
   // Escolaridade
   let esc = '';
@@ -3710,8 +3797,6 @@ function gerarCV() {
   // Estado do compartilhamento
   let compartilhamentos = {
     wpp:  { feito: false, aguardando: false, timer: null },
-    tg:   { feito: false, aguardando: false, timer: null },
-    fb:   { feito: false, aguardando: false, timer: null },
     link: { feito: false, aguardando: false, timer: null },
   };
   let totalCompartilhado = 0;
@@ -3732,8 +3817,6 @@ function gerarCV() {
     // Abrir a rede social
     const urls = {
       wpp:  `https://wa.me/?text=${MSG_SHARE}`,
-      tg:   `https://t.me/share/url?url=${encodeURIComponent(SITE_URL)}&text=${MSG_SHARE}`,
-      fb:   `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}`,
       link: null,
     };
 
@@ -3805,6 +3888,7 @@ function gerarCV() {
 
     // Mini confete ao confirmar cada um
     lancarConfetesMini();
+    if (window.vibrarToque) window.vibrarToque(15);
 
     // Atualizar barra de progresso
     atualizarProgressoShare();
