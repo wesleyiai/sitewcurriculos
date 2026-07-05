@@ -3706,8 +3706,10 @@
             width: 270px;
             flex-shrink: 0;
             background-color: var(--azul);
-            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 15px 15px;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+            background-size: 24px 24px;
             color: #fff;
             padding: 32px 26px;
             position: relative;
@@ -3719,12 +3721,19 @@
             position: relative;
         }
 
+        .cvw-brand-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
         .cvw-logo-badge {
             width: 52px;
             height: 52px;
             border-radius: 50%;
             overflow: hidden;
-            margin-bottom: 22px;
+            flex-shrink: 0;
             border: 2px solid rgba(255, 255, 255, 0.25);
             box-shadow: 0 0 0 4px rgba(36, 86, 164, 0.25);
         }
@@ -3735,9 +3744,39 @@
             object-fit: cover;
         }
 
+        .cvw-handle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            font-weight: 600;
+            color: var(--laranja2);
+            letter-spacing: 0.2px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 122, 47, 0.35);
+            padding: 4px 8px;
+            border-radius: 4px;
+            line-height: 1;
+        }
+
         .cvw-avatar-wrap {
+            position: relative;
+            width: 112px;
             margin-bottom: 18px;
         }
+
+        .cvw-frame-tl,
+        .cvw-frame-tr,
+        .cvw-frame-bl,
+        .cvw-frame-br {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--laranja2);
+        }
+
+        .cvw-frame-tl { top: -6px; left: -6px; border-right: none; border-bottom: none; }
+        .cvw-frame-tr { top: -6px; right: -6px; border-left: none; border-bottom: none; }
+        .cvw-frame-bl { bottom: -6px; left: -6px; border-right: none; border-top: none; }
+        .cvw-frame-br { bottom: -6px; right: -6px; border-left: none; border-top: none; }
 
         .cvw-avatar-ring {
             width: 112px;
@@ -3802,20 +3841,20 @@
             letter-spacing: 1.2px;
             color: var(--laranja2);
             margin: 0 0 12px;
-            padding-left: 11px;
+            padding-left: 20px;
             padding-bottom: 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             position: relative;
         }
 
         .cvw-side-section h3::before {
-            content: '';
+            content: '</>';
             position: absolute;
             left: 0;
-            top: 3px;
-            width: 6px;
-            height: 6px;
-            background: var(--laranja2);
+            top: 0;
+            font-size: 9px;
+            letter-spacing: 0;
+            color: rgba(255, 255, 255, 0.4);
         }
 
         .cvw-contact-list,
@@ -3869,20 +3908,20 @@
             color: var(--texto);
             margin: 0 0 14px;
             padding-bottom: 8px;
-            padding-left: 12px;
+            padding-left: 22px;
             border-bottom: 2.5px solid var(--laranja2);
             display: inline-block;
             position: relative;
         }
 
         .cvw-main-section h3::before {
-            content: '';
+            content: '</>';
             position: absolute;
             left: 0;
-            top: 3px;
-            width: 7px;
-            height: 7px;
-            background: var(--azul3);
+            top: 0;
+            font-size: 10px;
+            letter-spacing: 0;
+            color: var(--azul3);
         }
 
         #cvw-objective,
@@ -3905,12 +3944,13 @@
         .cvw-item::before {
             content: '';
             position: absolute;
-            left: -6px;
-            top: 3px;
-            width: 10px;
-            height: 10px;
-            background: var(--azul3);
-            transform: rotate(45deg);
+            left: -7px;
+            top: 2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2.5px solid var(--azul3);
             box-shadow: 0 0 0 3px rgba(36, 86, 164, 0.12);
         }
 
@@ -3950,9 +3990,20 @@
             position: absolute;
             bottom: 10px;
             right: 16px;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 7pt;
             color: var(--sub);
             font-weight: 600;
+        }
+
+        .cvw-footer-cursor {
+            color: var(--laranja2);
+            margin-right: 3px;
+        }
+
+        .cvw-footer-sep {
+            color: var(--laranja2);
+            margin: 0 2px;
         }
 
         .cvw-resume .hidden {
@@ -5808,9 +5859,16 @@
     <div style="position:absolute;left:-9999px;top:-9999px;overflow:hidden;">
         <div id="cvw-resume" class="cvw-resume">
             <aside class="cvw-sidebar">
-                <div class="cvw-logo-badge"><img id="cvw-logo" src="" alt="WCurrículos"></div>
+                <div class="cvw-brand-row">
+                    <div class="cvw-logo-badge"><img id="cvw-logo" src="" alt="WCurrículos"></div>
+                    <span class="cvw-handle">@wcurriculos</span>
+                </div>
 
                 <div class="cvw-avatar-wrap">
+                    <span class="cvw-frame-tl" aria-hidden="true"></span>
+                    <span class="cvw-frame-tr" aria-hidden="true"></span>
+                    <span class="cvw-frame-bl" aria-hidden="true"></span>
+                    <span class="cvw-frame-br" aria-hidden="true"></span>
                     <div class="cvw-avatar-ring">
                         <img id="cvw-photo" class="cvw-photo hidden" src="" alt="">
                         <div id="cvw-initials" class="cvw-initials"></div>
@@ -5857,7 +5915,7 @@
                     <p id="cvw-courses"></p>
                 </div>
 
-                <div class="cvw-brand-footer">wcurriculos • (82) 99910-6045</div>
+                <div class="cvw-brand-footer"><span class="cvw-footer-cursor">▍</span>wcurriculos <span class="cvw-footer-sep">❯</span> (82) 99910-6045</div>
             </div>
         </div>
     </div>
