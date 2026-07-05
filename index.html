@@ -3958,32 +3958,27 @@
             margin-bottom: 0;
         }
 
-        .cvw-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            gap: 10px;
-            margin-bottom: 3px;
-        }
-
-        .cvw-item-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--texto);
-        }
-
         .cvw-item-subtitle {
             font-size: 12px;
             font-weight: 600;
             color: var(--azul3);
+            margin-bottom: 3px;
         }
 
         .cvw-item-period {
+            display: block;
             font-family: 'JetBrains Mono', monospace;
             font-size: 10.3px;
             font-weight: 600;
             color: var(--sub);
-            white-space: nowrap;
+            margin-bottom: 3px;
+        }
+
+        .cvw-item-title {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--texto);
         }
 
         .cvw-brand-footer {
@@ -6849,11 +6844,9 @@
             cvwToggle('cvw-experience-section', temExp);
             document.getElementById('cvw-experience-list').innerHTML = temExp ? d.exps.map(e => (
                 '<div class="cvw-item">' +
-                '<div class="cvw-item-header">' +
-                '<span class="cvw-item-title">' + cvwEsc(e.cargo) + '</span>' +
-                '<span class="cvw-item-period">' + cvwEsc(e.periodo) + '</span>' +
-                '</div>' +
                 '<div class="cvw-item-subtitle">' + cvwEsc(e.empresa) + '</div>' +
+                '<span class="cvw-item-period">' + cvwEsc(e.periodo) + '</span>' +
+                '<span class="cvw-item-title">' + cvwEsc(e.cargo) + '</span>' +
                 '</div>'
             )).join('') : '';
 
