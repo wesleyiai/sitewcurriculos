@@ -872,6 +872,33 @@
             line-height: 1;
         }
 
+        .preco-lock {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Sora', sans-serif;
+            font-size: .92rem;
+            font-weight: 700;
+            color: var(--sub);
+            background: rgba(13, 31, 60, .05);
+            border: 1px dashed rgba(13, 31, 60, .18);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 24px;
+        }
+
+        .preco-lock .ico {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+        }
+
+        .plano.premium .preco-lock {
+            color: rgba(255, 255, 255, .8);
+            background: rgba(255, 255, 255, .07);
+            border-color: rgba(255, 255, 255, .25);
+        }
+
         .preco sup {
             font-size: 1.1rem;
             font-weight: 700;
@@ -1181,6 +1208,20 @@
             font-size: 1.8rem;
             font-weight: 900;
             color: var(--laranja2);
+        }
+
+        .form-plano-bar .pl-val.pl-locked {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--sub);
+        }
+
+        .form-plano-bar .pl-val.pl-locked .ico {
+            width: 14px;
+            height: 14px;
         }
 
         .fcard {
@@ -1584,12 +1625,58 @@
             margin-bottom: 12px;
         }
 
+        .pag-reveal-kicker {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--texto);
+            margin-bottom: 10px;
+        }
+
         .pag-val {
             font-family: 'Sora', sans-serif;
             font-size: 3.5rem;
             font-weight: 900;
             color: var(--azul);
-            margin: 4px 0 24px;
+            margin: 4px 0 12px;
+        }
+
+        .pag-val.pag-val-reveal {
+            animation: pagValReveal .6s cubic-bezier(.2, .9, .3, 1.4);
+        }
+
+        @keyframes pagValReveal {
+            0% {
+                opacity: 0;
+                transform: scale(.7);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(1.08);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .pag-reveal-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--sub);
+            margin-bottom: 24px;
+        }
+
+        .pag-reveal-note .ico {
+            width: 14px;
+            height: 14px;
+            color: #5dde8a;
         }
 
         .pag-val em {
@@ -5151,7 +5238,7 @@
                 <div class="p-ico"><svg class="ico"><use href="#i-document"></use></svg></div>
                 <div class="ph-title">Básico sem Foto</div>
                 <div class="pdesc">Ideal para quem quer praticidade</div>
-                <div class="preco"><sup>R$</sup> 9<sub>,90</sub></div>
+                <div class="preco-lock"><svg class="ico"><use href="#i-lock"></use></svg>Investimento revelado ao final</div>
                 <ul>
                     <li><svg class="ico li-check"><use href="#i-check"></use></svg>Currículo profissional completo</li>
                     <li><svg class="ico li-check"><use href="#i-check"></use></svg>Organização das informações</li>
@@ -5169,7 +5256,7 @@
                 <div class="p-ico"><svg class="ico"><use href="#i-crown"></use></svg></div>
                 <div class="ph-title">Premium com Foto</div>
                 <div class="pdesc">Destaque-se com visual moderno</div>
-                <div class="preco"><sup>R$</sup> 14<sub>,90</sub></div>
+                <div class="preco-lock"><svg class="ico"><use href="#i-lock"></use></svg>Investimento revelado ao final</div>
                 <ul>
                     <li><svg class="ico li-check"><use href="#i-check"></use></svg>Currículo profissional e moderno</li>
                     <li><svg class="ico li-check"><use href="#i-check"></use></svg>Foto tratada com IA</li>
@@ -5290,7 +5377,7 @@
                     <div class="pl-label">Plano selecionado</div>
                     <div class="pl-nome" id="form-pl-nome">—</div>
                 </div>
-                <div class="pl-val" id="form-pl-val">R$ 0,00</div>
+                <div class="pl-val pl-locked" id="form-pl-val"><svg class="ico"><use href="#i-lock"></use></svg>Revelado ao final</div>
             </div>
 
             <div class="fcard">
@@ -5600,8 +5687,10 @@
         </div>
         <div class="pag-wrap">
             <div class="pag-card">
+                <div class="pag-reveal-kicker">🎉 Seu currículo está pronto! Aqui está o seu investimento:</div>
                 <div class="pag-tag" id="pag-tag">Plano</div>
-                <div class="pag-val">R$ <em id="pag-valor">0,00</em></div>
+                <div class="pag-val" id="pag-val-wrap">R$ <em id="pag-valor">0,00</em></div>
+                <div class="pag-reveal-note"><svg class="ico"><use href="#i-shield"></use></svg>Valor final. Sem taxas escondidas.</div>
                 <div id="qrcode-container"></div>
                 <div class="pix-box">
                     <div class="pix-lbl">Chave PIX (Copia e Cola)</div>
@@ -5938,7 +6027,6 @@
             document.getElementById('plano-' + t).classList.add('sel');
             const p = planos[t];
             document.getElementById('form-pl-nome').textContent = p.nome;
-            document.getElementById('form-pl-val').textContent = 'R$ ' + p.preco;
             document.getElementById('card-foto').style.display = p.temFoto ? 'block' : 'none';
             const s = document.getElementById('secao-formulario');
             s.style.display = 'block';
@@ -7545,6 +7633,10 @@
                 const p = planos[plano];
                 document.getElementById('pag-tag').textContent = p.nome;
                 document.getElementById('pag-valor').textContent = p.preco;
+                const pagValWrap = document.getElementById('pag-val-wrap');
+                pagValWrap.classList.remove('pag-val-reveal');
+                void pagValWrap.offsetWidth; // reinicia a animação a cada revelação
+                pagValWrap.classList.add('pag-val-reveal');
                 document.getElementById('qrcode-container').innerHTML = '';
                 new QRCode(document.getElementById('qrcode-container'), {
                     text: PIX, width: 180, height: 180,
