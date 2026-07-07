@@ -4068,6 +4068,14 @@
             color: var(--texto);
         }
 
+        .cvw-item-desc {
+            font-size: 12px;
+            line-height: 1.55;
+            color: #3A3D43;
+            margin: 6px 0 0;
+            white-space: pre-line;
+        }
+
         .cvw-brand-footer {
             position: absolute;
             bottom: 10px;
@@ -5518,6 +5526,11 @@
                         <p>Até 3 empregos anteriores</p>
                     </div>
                 </div>
+                <label class="c-item" style="margin-bottom:14px">
+                    <input type="checkbox" id="f-sem-exp">
+                    <span>Ainda não tive nenhuma experiência profissional</span>
+                </label>
+                <div id="exp-cards-wrap">
                 <div class="exp-card">
                     <div class="exp-title"><span>1</span>Experiência 1</div>
                     <div class="fg full"><label>🔷 Nome da Empresa/Local que trabalhou:</label><input type="text"
@@ -5546,6 +5559,7 @@
                             placeholder="Ex: Vendedor"></div>
                 </div>
                 <p style="font-size:.76rem;color:var(--sub)">Deixe em branco os campos que não usar.</p>
+                </div>
             </div>
 
             <div class="fcard">
@@ -6152,6 +6166,16 @@
             modal.addEventListener('click', (e) => { if (e.target === modal) fecharCropModal(); });
         })();
 
+        document.getElementById('f-sem-exp').addEventListener('change', function () {
+            document.getElementById('exp-cards-wrap').style.display = this.checked ? 'none' : '';
+
+            const objetivoEl = document.getElementById('f-objetivo');
+            const atual = objetivoEl.value.trim();
+            if (!atual || cvwObjetivoEhPadrao(atual)) {
+                objetivoEl.value = this.checked ? OBJETIVO_PRIMEIRO_EMPREGO : OBJETIVO_PADRAO;
+            }
+        });
+
         function validarForm() {
             const nome = document.getElementById('f-nome').value.trim();
             const nasc = document.getElementById('f-nasc').value.trim();
@@ -6181,12 +6205,15 @@
             }
             const fund = document.querySelector('input[name="fund"]:checked');
             const med = document.querySelector('input[name="medio"]:checked');
+            const semExperiencia = document.getElementById('f-sem-exp').checked;
             const emps = [...document.querySelectorAll('.exp-emp')];
             const pers = [...document.querySelectorAll('.exp-per')];
             const cars = [...document.querySelectorAll('.exp-car')];
             const exps = [];
-            for (let i = 0; i < 3; i++) { const emp = emps[i]?.value.trim(); if (emp) exps.push({ empresa: emp, periodo: pers[i]?.value.trim() || '', cargo: cars[i]?.value.trim() || '' }); }
-            dados = { nome, nasc, email, tel, cep, cidade, bairro, estado, fund: fund ? fund.value : 'Não informado', medio: med ? med.value : 'Não informado', superior: document.getElementById('f-sup').value.trim(), objetivo: document.getElementById('f-objetivo').value.trim(), exps, cursos, qual, cnh: cnh.value, foto: plano === 'premium' ? document.getElementById('prev-foto').src : null };
+            if (!semExperiencia) {
+                for (let i = 0; i < 3; i++) { const emp = emps[i]?.value.trim(); if (emp) exps.push({ empresa: emp, periodo: pers[i]?.value.trim() || '', cargo: cars[i]?.value.trim() || '' }); }
+            }
+            dados = { nome, nasc, email, tel, cep, cidade, bairro, estado, fund: fund ? fund.value : 'Não informado', medio: med ? med.value : 'Não informado', superior: document.getElementById('f-sup').value.trim(), objetivo: document.getElementById('f-objetivo').value.trim(), exps, semExperiencia, cursos, qual, cnh: cnh.value, foto: plano === 'premium' ? document.getElementById('prev-foto').src : null };
 
             const p = planos[plano];
             document.getElementById('pag-tag').textContent = p.nome;
@@ -6881,6 +6908,20 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
 
+        // ══ SEM EXPERIÊNCIA: bloco criativo p/ quem busca a 1ª oportunidade ══
+        const CVW_PRIMEIRO_EMPREGO = {
+            subtitulo: 'Em busca da primeira oportunidade',
+            titulo: 'Pronto(a) para iniciar minha trajetória profissional',
+            desc: 'Ainda não tive a oportunidade de atuar formalmente no mercado de trabalho, mas trago disposição para aprender rápido, comprometimento com prazos e responsabilidades, proatividade no dia a dia e vontade genuína de crescer junto com a equipe. Estou pronto(a) para vestir a camisa da empresa e entregar meu melhor desde o primeiro dia.',
+        };
+
+        const OBJETIVO_PADRAO = 'Busco uma oportunidade para integrar uma empresa onde eu possa aplicar minhas competências, contribuir para o alcance dos objetivos organizacionais e desenvolver continuamente minhas habilidades, atuando com comprometimento, responsabilidade, proatividade e foco em resultados.';
+        const OBJETIVO_PRIMEIRO_EMPREGO = 'Em busca da minha primeira oportunidade no mercado de trabalho, com disposição para aprender rápido, comprometimento com prazos e responsabilidades, e motivação genuína para crescer profissionalmente ao lado de uma boa equipe.';
+
+        function cvwObjetivoEhPadrao(texto) {
+            return texto === OBJETIVO_PADRAO || texto === OBJETIVO_PRIMEIRO_EMPREGO;
+        }
+
         function cvwToggle(id, visivel) {
             document.getElementById(id).classList.toggle('hidden', !visivel);
         }
@@ -6928,15 +6969,25 @@
             cvwToggle('cvw-objective-section', !!d.objetivo);
             document.getElementById('cvw-objective').textContent = d.objetivo || '';
 
-            const temExp = d.exps && d.exps.length > 0;
-            cvwToggle('cvw-experience-section', temExp);
-            document.getElementById('cvw-experience-list').innerHTML = temExp ? d.exps.map(e => (
-                '<div class="cvw-item">' +
-                '<div class="cvw-item-subtitle">' + cvwEsc(e.empresa) + '</div>' +
-                '<span class="cvw-item-period">' + cvwEsc(e.periodo) + '</span>' +
-                '<span class="cvw-item-title">' + cvwEsc(e.cargo) + '</span>' +
-                '</div>'
-            )).join('') : '';
+            if (d.semExperiencia) {
+                cvwToggle('cvw-experience-section', true);
+                document.getElementById('cvw-experience-list').innerHTML =
+                    '<div class="cvw-item">' +
+                    '<div class="cvw-item-subtitle">' + cvwEsc(CVW_PRIMEIRO_EMPREGO.subtitulo) + '</div>' +
+                    '<span class="cvw-item-title">' + cvwEsc(CVW_PRIMEIRO_EMPREGO.titulo) + '</span>' +
+                    '<p class="cvw-item-desc">' + cvwEsc(CVW_PRIMEIRO_EMPREGO.desc) + '</p>' +
+                    '</div>';
+            } else {
+                const temExp = d.exps && d.exps.length > 0;
+                cvwToggle('cvw-experience-section', temExp);
+                document.getElementById('cvw-experience-list').innerHTML = temExp ? d.exps.map(e => (
+                    '<div class="cvw-item">' +
+                    '<div class="cvw-item-subtitle">' + cvwEsc(e.empresa) + '</div>' +
+                    '<span class="cvw-item-period">' + cvwEsc(e.periodo) + '</span>' +
+                    '<span class="cvw-item-title">' + cvwEsc(e.cargo) + '</span>' +
+                    '</div>'
+                )).join('') : '';
+            }
 
             cvwToggle('cvw-qualities-section', !!d.qual);
             document.getElementById('cvw-qualities').textContent = d.qual || '';
@@ -7200,10 +7251,11 @@
                     }
                 });
 
-                // Experiência (pelo menos empresa preenchida)
+                // Experiência (pelo menos empresa preenchida, ou "sem experiência" marcado)
                 const expEmps = document.querySelectorAll('.exp-emp');
+                const semExpEl = document.getElementById('f-sem-exp');
                 totalPeso += 2; totalCampos++;
-                if (expEmps.length && expEmps[0].value.trim()) {
+                if ((semExpEl && semExpEl.checked) || (expEmps.length && expEmps[0].value.trim())) {
                     preenchidoPeso += 2;
                     camposPreenchidos++;
                 }
@@ -7695,13 +7747,16 @@
                 // Coletar dados (igual ao original)
                 const fund = document.querySelector('input[name="fund"]:checked');
                 const med = document.querySelector('input[name="medio"]:checked');
+                const semExperiencia = document.getElementById('f-sem-exp').checked;
                 const emps = [...document.querySelectorAll('.exp-emp')];
                 const pers = [...document.querySelectorAll('.exp-per')];
                 const cars = [...document.querySelectorAll('.exp-car')];
                 const exps = [];
-                for (let i = 0; i < 3; i++) {
-                    const emp = emps[i]?.value.trim();
-                    if (emp) exps.push({ empresa: emp, periodo: pers[i]?.value.trim() || '', cargo: cars[i]?.value.trim() || '' });
+                if (!semExperiencia) {
+                    for (let i = 0; i < 3; i++) {
+                        const emp = emps[i]?.value.trim();
+                        if (emp) exps.push({ empresa: emp, periodo: pers[i]?.value.trim() || '', cargo: cars[i]?.value.trim() || '' });
+                    }
                 }
 
                 dados = {
@@ -7710,7 +7765,7 @@
                     medio: med ? med.value : 'Não informado',
                     superior: document.getElementById('f-sup').value.trim(),
                     objetivo: document.getElementById('f-objetivo').value.trim(),
-                    exps, cursos, qual, cnh: cnh.value,
+                    exps, semExperiencia, cursos, qual, cnh: cnh.value,
                     foto: plano === 'premium' ? document.getElementById('prev-foto').src : null
                 };
 
