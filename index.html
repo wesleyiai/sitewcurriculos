@@ -6927,7 +6927,11 @@
                     ? d.exps.map((e, i) => `${i + 1}. ${e.cargo} | ${e.empresa} | ${e.periodo}`).join('\n')
                     : 'Sem experiência informada';
 
-                // Parâmetros para o template EmailJS
+                // Parâmetros para o template EmailJS. O PDF e a foto NÃO vão
+                // aqui: o EmailJS rejeita (413) qualquer envio com mais de 50KB
+                // de variáveis, e o PDF sozinho já passa disso — iam pro
+                // WhatsApp (que já leva os dados completos) e pro download
+                // direto no site.
                 const params = {
                     nome_cliente: d.nome,
                     plano: planos[plano].nome,
@@ -6946,8 +6950,6 @@
                     cursos: d.cursos || 'Nenhum',
                     qualidades: d.qual,
                     cnh: d.cnh,
-                    curriculo_pdf: pdfDataUri,
-                    foto_original: d.foto || '',
                     to_name: 'WCurriculos',
                 };
 
