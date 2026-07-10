@@ -1,3 +1,5 @@
+const { salvarPedido, buscarPedido } = require('./_lib/pedidos');
+
 module.exports = async (req, res) => {
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Método não permitido' });
@@ -30,11 +32,29 @@ module.exports = async (req, res) => {
       return;
     }
 
+    const paid = Boolean(data.paid);
+    let pedido = null;
+
+    if (paid) {
+      // Recupera plano+dados salvos no create-link, pra o site conseguir
+      // gerar/baixar o currículo mesmo se o cliente fechou a aba ou o
+      // sessionStorage/localStorage daquele navegador não tiver mais nada.
+      pedido = await buscarPedido(order_nsu);
+      if (pedido) {
+        try {
+          await salvarPedido(order_nsu, { ...pedido, paid: true, paidAt: new Date().toISOString() });
+        } catch (err) {
+          console.error('Falha ao atualizar pedido no Blob:', err);
+        }
+      }
+    }
+
     res.status(200).json({
-      paid: Boolean(data.paid),
+      paid,
       amount: data.amount,
       paid_amount: data.paid_amount,
       capture_method: data.capture_method,
+      pedido: pedido ? { plano: pedido.plano, dados: pedido.dados } : null,
     });
   } catch (err) {
     res.status(500).json({ error: 'Falha ao comunicar com a InfinitePay' });

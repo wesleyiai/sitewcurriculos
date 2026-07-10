@@ -7677,13 +7677,22 @@
             btn.disabled = true;
             setPagStatus('Gerando pagamento seguro...', false);
 
-            sessionStorage.setItem('cvw_plano', plano);
-            sessionStorage.setItem('cvw_dados', JSON.stringify(dados));
+            // localStorage (não sessionStorage): sessionStorage é apagado se o
+            // cliente fechar a aba ou o navegador ficar muito tempo em segundo
+            // plano no celular — o que faz o site "esquecer" o pedido bem na
+            // hora de liberar o download. localStorage sobrevive a isso. Como
+            // reforço adicional, os mesmos dados também são salvos no servidor
+            // logo abaixo (envio de "dados" pro /api/create-link) — ver
+            // api/check-payment.js, que devolve esses dados de volta ao site
+            // mesmo que o localStorage também tenha sido perdido (ex: cliente
+            // voltou em outro aparelho/navegador).
+            localStorage.setItem('cvw_plano', plano);
+            localStorage.setItem('cvw_dados', JSON.stringify(dados));
 
             fetch('/api/create-link', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plano }),
+                body: JSON.stringify({ plano, dados }),
             })
                 .then((resp) => resp.json().then((data) => ({ ok: resp.ok, data })))
                 .then(({ ok, data }) => {
@@ -7720,6 +7729,20 @@
                 .then((resp) => resp.json().then((data) => ({ ok: resp.ok, data })))
                 .then(({ ok, data }) => {
                     if (ok && data.paid) {
+                        // Se o navegador perdeu o localStorage (aba fechada, veio
+                        // de outro aparelho etc.), usa o que o servidor guardou —
+                        // ver api/create-link.js/check-payment.js.
+                        if (data.pedido && data.pedido.dados) {
+                            plano = data.pedido.plano || plano;
+                            dados = data.pedido.dados;
+                        }
+                        if (!dados || !dados.nome) {
+                            setPagStatus('Pagamento confirmado, mas não encontramos os dados do seu currículo neste navegador. Chame no WhatsApp que resolvemos na hora.', true);
+                            return;
+                        }
+                        const p = planos[plano];
+                        document.getElementById('pag-tag').textContent = p.nome;
+                        document.getElementById('pag-valor').textContent = p.preco;
                         setPagStatus('Pagamento confirmado!', false);
                         document.getElementById('btn-confirmar').style.display = 'none';
                         finalizarPedidoPago();
@@ -7741,21 +7764,24 @@
             const slug = url.searchParams.get('slug');
             if (!orderNsu || !transactionNsu || !slug) return;
 
-            const savedPlano = sessionStorage.getItem('cvw_plano');
-            const savedDados = sessionStorage.getItem('cvw_dados');
+            // localStorage (não sessionStorage) — ver comentário em
+            // iniciarPagamento(). Se mesmo assim estiver vazio (aba fechada +
+            // reaberta em outro navegador/aparelho, ou dados limpos), segue em
+            // frente do mesmo jeito: checkPaymentParams() abaixo busca os
+            // dados de volta no servidor (api/check-payment.js) antes de
+            // desistir.
+            const savedPlano = localStorage.getItem('cvw_plano');
+            const savedDados = localStorage.getItem('cvw_dados');
             window.history.replaceState(null, '', window.location.pathname);
 
-            if (!savedPlano || !savedDados) {
-                alert('Não encontramos os dados do seu currículo neste navegador. Se você concluiu o pagamento, chame no WhatsApp que resolvemos na hora.');
-                return;
+            if (savedPlano && savedDados) {
+                plano = savedPlano;
+                dados = JSON.parse(savedDados);
+                const p = planos[plano];
+                document.getElementById('pag-tag').textContent = p.nome;
+                document.getElementById('pag-valor').textContent = p.preco;
             }
 
-            plano = savedPlano;
-            dados = JSON.parse(savedDados);
-
-            const p = planos[plano];
-            document.getElementById('pag-tag').textContent = p.nome;
-            document.getElementById('pag-valor').textContent = p.preco;
             document.getElementById('btn-confirmar').style.display = 'none';
             const sp = document.getElementById('secao-pagamento');
             sp.style.display = 'block';
