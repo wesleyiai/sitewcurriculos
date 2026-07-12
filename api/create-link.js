@@ -13,6 +13,7 @@ const PLANOS = {
 // preço cobrado vem sempre daqui.
 const CARTA_APRESENTACAO = { cents: 290, description: 'Carta de Apresentação personalizada - WCurrículos' };
 const MODELO_MENSAGEM = { cents: 350, description: 'Modelo de Mensagem para Vagas - WCurrículos' };
+const CHECKLIST_ENTREVISTA = { cents: 190, description: 'Checklist Antes da Entrevista - WCurrículos' };
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -30,6 +31,7 @@ module.exports = async (req, res) => {
   const dados = req.body && req.body.dados;
   const cartaApresentacao = Boolean(req.body && req.body.cartaApresentacao);
   const mensagemVagas = Boolean(req.body && req.body.mensagemVagas);
+  const checklistEntrevista = Boolean(req.body && req.body.checklistEntrevista);
   const item = PLANOS[plano];
   if (!item) {
     res.status(400).json({ error: 'Plano inválido' });
@@ -45,6 +47,9 @@ module.exports = async (req, res) => {
   }
   if (mensagemVagas) {
     items.push({ quantity: 1, price: MODELO_MENSAGEM.cents, description: MODELO_MENSAGEM.description });
+  }
+  if (checklistEntrevista) {
+    items.push({ quantity: 1, price: CHECKLIST_ENTREVISTA.cents, description: CHECKLIST_ENTREVISTA.description });
   }
 
   try {
@@ -72,7 +77,7 @@ module.exports = async (req, res) => {
     // reconstruir o currículo depois, sem depender de sessionStorage/localStorage.
     if (dados) {
       try {
-        await salvarPedido(orderNsu, { plano, dados, cartaApresentacao, mensagemVagas, paid: false, createdAt: new Date().toISOString() });
+        await salvarPedido(orderNsu, { plano, dados, cartaApresentacao, mensagemVagas, checklistEntrevista, paid: false, createdAt: new Date().toISOString() });
       } catch (err) {
         console.error('Falha ao salvar pedido no Blob:', err);
       }
