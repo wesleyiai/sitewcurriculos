@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
       amount: data.amount,
       paid_amount: data.paid_amount,
       capture_method: data.capture_method,
-      pedido: pedido ? { plano: pedido.plano, dados: pedido.dados } : null,
+      pedido: pedido ? { plano: pedido.plano, dados: pedido.dados, cartaApresentacao: Boolean(pedido.cartaApresentacao) } : null,
     });
   } catch (err) {
     res.status(500).json({ error: 'Falha ao comunicar com a InfinitePay' });
