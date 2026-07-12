@@ -12,6 +12,7 @@ const PLANOS = {
 // personalizada. Mesma regra acima — o cliente só manda um booleano, o
 // preço cobrado vem sempre daqui.
 const CARTA_APRESENTACAO = { cents: 290, description: 'Carta de Apresentação personalizada - WCurrículos' };
+const MODELO_MENSAGEM = { cents: 350, description: 'Modelo de Mensagem para Vagas - WCurrículos' };
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -28,6 +29,7 @@ module.exports = async (req, res) => {
   const plano = req.body && req.body.plano;
   const dados = req.body && req.body.dados;
   const cartaApresentacao = Boolean(req.body && req.body.cartaApresentacao);
+  const mensagemVagas = Boolean(req.body && req.body.mensagemVagas);
   const item = PLANOS[plano];
   if (!item) {
     res.status(400).json({ error: 'Plano inválido' });
@@ -40,6 +42,9 @@ module.exports = async (req, res) => {
   const items = [{ quantity: 1, price: item.cents, description: item.description }];
   if (cartaApresentacao) {
     items.push({ quantity: 1, price: CARTA_APRESENTACAO.cents, description: CARTA_APRESENTACAO.description });
+  }
+  if (mensagemVagas) {
+    items.push({ quantity: 1, price: MODELO_MENSAGEM.cents, description: MODELO_MENSAGEM.description });
   }
 
   try {
@@ -67,7 +72,7 @@ module.exports = async (req, res) => {
     // reconstruir o currículo depois, sem depender de sessionStorage/localStorage.
     if (dados) {
       try {
-        await salvarPedido(orderNsu, { plano, dados, cartaApresentacao, paid: false, createdAt: new Date().toISOString() });
+        await salvarPedido(orderNsu, { plano, dados, cartaApresentacao, mensagemVagas, paid: false, createdAt: new Date().toISOString() });
       } catch (err) {
         console.error('Falha ao salvar pedido no Blob:', err);
       }

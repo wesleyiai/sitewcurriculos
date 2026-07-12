@@ -5647,6 +5647,13 @@
                         <div class="pag-bump-desc">Uma carta personalizada com seus dados, pronta para enviar junto do currículo nas vagas. Aumenta suas chances de resposta.</div>
                     </div>
                 </label>
+                <label class="pag-bump" for="chk-mensagem">
+                    <input type="checkbox" id="chk-mensagem" onchange="atualizarValorExibicao()">
+                    <div>
+                        <div class="pag-bump-title">💬 Adicione o Modelo de Mensagem para Vagas — <em>+ R$ 3,50</em></div>
+                        <div class="pag-bump-desc">Textos prontos para colar no LinkedIn, WhatsApp e grupos de emprego quando for se candidatar. Só personalizar e enviar.</div>
+                    </div>
+                </label>
                 <p class="pag-status" id="pag-status">Você será levado para um checkout seguro (Pix ou cartão). Seu currículo é liberado automaticamente assim que o pagamento for confirmado.</p>
                 <button id="btn-confirmar" onclick="iniciarPagamento()" style="display:flex">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
@@ -5676,6 +5683,12 @@
                 <button id="btn-baixar-carta" class="btn-main" onclick="baixarCartaPdf()"
                     style="font-size:1.05rem;">
                     📥 Baixar minha Carta de Apresentação
+                </button>
+            </div>
+            <div id="mensagem-download-wrap" style="display:none;margin:0 0 20px;">
+                <button id="btn-baixar-mensagem" class="btn-main" onclick="baixarMensagemPdf()"
+                    style="font-size:1.05rem;">
+                    📥 Baixar meu Modelo de Mensagem para Vagas
                 </button>
             </div>
             <div class="prazo">💬 Também confirmamos tudo pelo WhatsApp — qualquer dúvida, é só chamar.</div>
@@ -5953,30 +5966,37 @@
         let plano = null, dados = {};
         // Order bump: carta de apresentação personalizada (opcional, +R$2,90).
         let cartaApresentacao = false;
+        // Order bump: modelo de mensagem para vagas (opcional, +R$3,50).
+        let mensagemVagas = false;
         // PDF do currículo já gerado, guardado aqui pra alimentar o botão
         // "Baixar meu currículo" (permite baixar de novo quantas vezes quiser).
         let curriculoPdfDataUri = null;
         // Mesma ideia, pro PDF da carta de apresentação (só existe se o
         // cliente marcou o order bump).
         let cartaPdfDataUri = null;
+        // E pro PDF do modelo de mensagem (idem, só existe se marcado).
+        let mensagemPdfDataUri = null;
         const planos = {
             basico: { nome: 'Básico sem Foto', preco: '9,90', temFoto: false },
             premium: { nome: 'Premium com Foto', preco: '14,90', temFoto: true }
         };
         const CARTA_PRECO = 2.90;
+        const MENSAGEM_PRECO = 3.50;
 
-        // Calcula e exibe o valor total (plano + bump da carta, se marcado).
-        // Chamada sempre que a tela de pagamento é (re)montada ou o
-        // checkbox do bump muda — mantém #pag-valor sempre consistente com
-        // o que de fato vai ser cobrado (o valor real é recalculado e
-        // travado no servidor, em api/create-link.js).
+        // Calcula e exibe o valor total (plano + bumps marcados). Chamada
+        // sempre que a tela de pagamento é (re)montada ou algum checkbox de
+        // bump muda — mantém #pag-valor sempre consistente com o que de
+        // fato vai ser cobrado (o valor real é recalculado e travado no
+        // servidor, em api/create-link.js).
         function atualizarValorExibicao() {
             const p = planos[plano];
             const el = document.getElementById('pag-valor');
             if (!p || !el) return;
-            const chk = document.getElementById('chk-carta');
+            const chkCarta = document.getElementById('chk-carta');
+            const chkMensagem = document.getElementById('chk-mensagem');
             let total = parseFloat(p.preco.replace(',', '.'));
-            if (chk && chk.checked) total += CARTA_PRECO;
+            if (chkCarta && chkCarta.checked) total += CARTA_PRECO;
+            if (chkMensagem && chkMensagem.checked) total += MENSAGEM_PRECO;
             el.textContent = total.toFixed(2).replace('.', ',');
         }
 
@@ -6202,12 +6222,14 @@
             let expTxt = '';
             if (d.exps && d.exps.length) d.exps.forEach((e, i) => { expTxt += `\n   ${i + 1}. ${e.empresa} | ${e.cargo} | ${e.periodo}`; });
             else expTxt = ' Sem experiência informada';
-            const valorTotalTxt = cartaApresentacao
-                ? (parseFloat(p.preco.replace(',', '.')) + CARTA_PRECO).toFixed(2).replace('.', ',')
-                : p.preco;
+            let valorTotal = parseFloat(p.preco.replace(',', '.'));
+            if (cartaApresentacao) valorTotal += CARTA_PRECO;
+            if (mensagemVagas) valorTotal += MENSAGEM_PRECO;
+            const valorTotalTxt = valorTotal.toFixed(2).replace('.', ',');
             const cartaTxt = cartaApresentacao ? '\n\n✉️ Também adquiri a Carta de Apresentação personalizada (+R$ 2,90).' : '';
+            const mensagemTxt = mensagemVagas ? '\n\n💬 Também adquiri o Modelo de Mensagem para Vagas (+R$ 3,50).' : '';
             return encodeURIComponent(
-                `Olá, WCurrículos! 👋\n\nRealizei o pagamento do *${p.nome}* (R$ ${valorTotalTxt}).${cartaTxt}\n\n📋 *DADOS PESSOAIS:*\n👤 ${d.nome}\n🎂 ${d.nasc}\n📧 ${d.email}\n📱 ${d.tel}\n\n📍 *ENDEREÇO:*\n${d.bairro}, ${d.cidade} – ${d.estado} | CEP: ${d.cep}\n\n🎓 *ESCOLARIDADE:*\nFundamental: ${d.fund}\nMédio: ${d.medio}\n${d.superior ? 'Superior: ' + d.superior : ''}\n\n💼 *EXPERIÊNCIAS:*${expTxt}\n\n📚 *CURSOS:*\n${d.cursos || 'Nenhum'}\n\n⚡ *QUALIDADES:*\n${d.qual}\n\n🚗 *CNH:* ${d.cnh}\n\nAguardo meu currículo! 😊`
+                `Olá, WCurrículos! 👋\n\nRealizei o pagamento do *${p.nome}* (R$ ${valorTotalTxt}).${cartaTxt}${mensagemTxt}\n\n📋 *DADOS PESSOAIS:*\n👤 ${d.nome}\n🎂 ${d.nasc}\n📧 ${d.email}\n📱 ${d.tel}\n\n📍 *ENDEREÇO:*\n${d.bairro}, ${d.cidade} – ${d.estado} | CEP: ${d.cep}\n\n🎓 *ESCOLARIDADE:*\nFundamental: ${d.fund}\nMédio: ${d.medio}\n${d.superior ? 'Superior: ' + d.superior : ''}\n\n💼 *EXPERIÊNCIAS:*${expTxt}\n\n📚 *CURSOS:*\n${d.cursos || 'Nenhum'}\n\n⚡ *QUALIDADES:*\n${d.qual}\n\n🚗 *CNH:* ${d.cnh}\n\nAguardo meu currículo! 😊`
             );
         }
 
@@ -6228,6 +6250,15 @@
                     if (cartaWrap) cartaWrap.style.display = 'block';
                 } catch (e) {
                     console.error('Erro ao gerar carta de apresentação:', e);
+                }
+            }
+            if (mensagemVagas) {
+                try {
+                    mensagemPdfDataUri = gerarModeloMensagem(dados);
+                    const mensagemWrap = document.getElementById('mensagem-download-wrap');
+                    if (mensagemWrap) mensagemWrap.style.display = 'block';
+                } catch (e) {
+                    console.error('Erro ao gerar modelo de mensagem:', e);
                 }
             }
             const s = document.getElementById('secao-sucesso');
@@ -6435,6 +6466,85 @@
                 URL.revokeObjectURL(url);
             } catch (e) {
                 console.error('Erro ao baixar carta de apresentação:', e);
+            }
+        }
+
+        // ══ MODELO DE MENSAGEM PARA VAGAS (order bump) ══
+        // Três textos curtos, prontos pra colar, personalizados com nome,
+        // cargo mais recente (se houver experiência) e qualidades — cada um
+        // pensado pro canal onde o cliente costuma se candidatar.
+        function gerarModeloMensagem(d) {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+            const marginX = 60;
+            const maxWidth = 475;
+            let y = 80;
+
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(20);
+            pdf.setTextColor(13, 31, 60);
+            pdf.text('Modelos de Mensagem para Vagas', marginX, y);
+            pdf.setDrawColor(255, 122, 47);
+            pdf.setLineWidth(2);
+            pdf.line(marginX, y + 10, marginX + 90, y + 10);
+            y += 50;
+
+            const cargoRecente = (d.exps && d.exps[0] && d.exps[0].cargo) ? d.exps[0].cargo : null;
+
+            const blocos = [
+                {
+                    titulo: '💼 Para LinkedIn / E-mail (recrutador)',
+                    texto: `Olá! Meu nome é ${d.nome}${cargoRecente ? `, atuei como ${cargoRecente}` : ''} e vi a vaga divulgada em sua empresa. Tenho interesse em concorrer à posição e acredito que meu perfil (${d.qual}) pode agregar bastante ao time. Segue meu currículo em anexo — fico à disposição para conversarmos. Obrigado(a) pela atenção!`,
+                },
+                {
+                    titulo: '📱 Para WhatsApp / Grupos de Emprego',
+                    texto: `Oi, tudo bem? Me chamo ${d.nome} e estou em busca de uma nova oportunidade${cargoRecente ? ` na área de ${cargoRecente}` : ''}. Vi que vocês estão com vagas abertas e gostaria de me candidatar. Segue meu currículo em anexo. Desde já agradeço a oportunidade! 🙏`,
+                },
+                {
+                    titulo: '📩 Para enviar direto ao recrutador (formal)',
+                    texto: `Prezado(a), boa tarde. Meu nome é ${d.nome} e tenho interesse em fazer parte do processo seletivo para a vaga divulgada. Encaminho meu currículo em anexo para análise e fico à disposição para uma entrevista a qualquer momento. Atenciosamente, ${d.nome}.`,
+                },
+            ];
+
+            blocos.forEach((bloco) => {
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(12.5);
+                pdf.setTextColor(232, 98, 26);
+                const tituloLines = pdf.splitTextToSize(bloco.titulo, maxWidth);
+                pdf.text(tituloLines, marginX, y);
+                y += tituloLines.length * 16 + 8;
+
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(11);
+                pdf.setTextColor(30, 30, 30);
+                const textoLines = pdf.splitTextToSize(bloco.texto, maxWidth);
+                pdf.text(textoLines, marginX, y);
+                y += textoLines.length * 15.5 + 30;
+            });
+
+            return pdf.output('datauristring');
+        }
+
+        function baixarMensagemPdf() {
+            if (!mensagemPdfDataUri) return;
+            try {
+                const base64 = mensagemPdfDataUri.split(',')[1];
+                const byteChars = atob(base64);
+                const byteArr = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                    byteArr[i] = byteChars.charCodeAt(i);
+                }
+                const blob = new Blob([byteArr], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `modelo_mensagem_vagas_${(dados.nome || 'wcurriculos').replace(/\s+/g, '_')}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                console.error('Erro ao baixar modelo de mensagem:', e);
             }
         }
 
@@ -7855,15 +7965,18 @@
             // voltou em outro aparelho/navegador).
             const chkCarta = document.getElementById('chk-carta');
             cartaApresentacao = Boolean(chkCarta && chkCarta.checked);
+            const chkMensagem = document.getElementById('chk-mensagem');
+            mensagemVagas = Boolean(chkMensagem && chkMensagem.checked);
 
             localStorage.setItem('cvw_plano', plano);
             localStorage.setItem('cvw_dados', JSON.stringify(dados));
             localStorage.setItem('cvw_carta', cartaApresentacao ? '1' : '0');
+            localStorage.setItem('cvw_mensagem', mensagemVagas ? '1' : '0');
 
             fetch('/api/create-link', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plano, dados, cartaApresentacao }),
+                body: JSON.stringify({ plano, dados, cartaApresentacao, mensagemVagas }),
             })
                 .then((resp) => resp.json().then((data) => ({ ok: resp.ok, data })))
                 .then(({ ok, data }) => {
@@ -7907,6 +8020,7 @@
                             plano = data.pedido.plano || plano;
                             dados = data.pedido.dados;
                             cartaApresentacao = Boolean(data.pedido.cartaApresentacao);
+                            mensagemVagas = Boolean(data.pedido.mensagemVagas);
                         }
                         if (!dados || !dados.nome) {
                             setPagStatus('Pagamento confirmado, mas não encontramos os dados do seu currículo neste navegador. Chame no WhatsApp que resolvemos na hora.', true);
@@ -7914,6 +8028,8 @@
                         }
                         const chkCartaConfirma = document.getElementById('chk-carta');
                         if (chkCartaConfirma) chkCartaConfirma.checked = cartaApresentacao;
+                        const chkMensagemConfirma = document.getElementById('chk-mensagem');
+                        if (chkMensagemConfirma) chkMensagemConfirma.checked = mensagemVagas;
                         const p = planos[plano];
                         document.getElementById('pag-tag').textContent = p.nome;
                         atualizarValorExibicao();
@@ -7947,14 +8063,18 @@
             const savedPlano = localStorage.getItem('cvw_plano');
             const savedDados = localStorage.getItem('cvw_dados');
             const savedCarta = localStorage.getItem('cvw_carta');
+            const savedMensagem = localStorage.getItem('cvw_mensagem');
             window.history.replaceState(null, '', window.location.pathname);
 
             if (savedPlano && savedDados) {
                 plano = savedPlano;
                 dados = JSON.parse(savedDados);
                 cartaApresentacao = savedCarta === '1';
+                mensagemVagas = savedMensagem === '1';
                 const chkCartaRetorno = document.getElementById('chk-carta');
                 if (chkCartaRetorno) chkCartaRetorno.checked = cartaApresentacao;
+                const chkMensagemRetorno = document.getElementById('chk-mensagem');
+                if (chkMensagemRetorno) chkMensagemRetorno.checked = mensagemVagas;
                 const p = planos[plano];
                 document.getElementById('pag-tag').textContent = p.nome;
                 atualizarValorExibicao();
