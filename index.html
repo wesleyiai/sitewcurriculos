@@ -4801,7 +4801,7 @@
                 "name": "Em quanto tempo recebo meu currículo?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Seu currículo é entregue em até 2 horas após a confirmação do pagamento, diretamente no seu WhatsApp. Em horários de pico pode levar um pouco mais, mas sempre comunicamos."
+                    "text": "Seu currículo fica pronto em menos de 5 minutos após a confirmação do pagamento: o PDF é gerado automaticamente e liberado na hora, com confirmação também pelo WhatsApp."
                 }
             },
             {
@@ -4861,7 +4861,7 @@
         "@type": "Service",
         "serviceType": "Elaboração de currículo profissional",
         "name": "WCurrículos",
-        "description": "Currículo profissional em PDF entregue via WhatsApp em até 2 horas.",
+        "description": "Currículo profissional em PDF, pronto em menos de 5 minutos e entregue via WhatsApp.",
         "provider": {
             "@type": "Organization",
             "name": "WCurrículos",
@@ -4879,14 +4879,14 @@
                     "name": "Básico sem Foto",
                     "price": "9.90",
                     "priceCurrency": "BRL",
-                    "description": "Currículo profissional completo em PDF, entrega via WhatsApp em até 2 horas."
+                    "description": "Currículo profissional completo em PDF, pronto em menos de 5 minutos e entregue via WhatsApp."
                 },
                 {
                     "@type": "Offer",
                     "name": "Premium com Foto",
                     "price": "14.90",
                     "priceCurrency": "BRL",
-                    "description": "Currículo profissional moderno com foto tratada por IA, layout premium exclusivo e eBook bônus, entrega via WhatsApp em até 2 horas."
+                    "description": "Currículo profissional moderno com foto tratada por IA, layout premium exclusivo e eBook bônus, pronto em menos de 5 minutos e entregue via WhatsApp."
                 }
             ]
         }
@@ -5077,7 +5077,7 @@
                     <div class="lbl">Acessos ao site</div>
                 </div>
                 <div class="stat">
-                    <div class="num">2<em>h</em></div>
+                    <div class="num">5<em>min</em></div>
                     <div class="lbl">Prazo de entrega</div>
                 </div>
                 <div class="stat">
@@ -5265,7 +5265,7 @@
                 profissional.</p>
             <div class="garantia-items">
                 <div class="g-item"><span class="g-icon"><svg class="ico"><use href="#i-check"></use></svg></span> PDF de alta qualidade</div>
-                <div class="g-item"><span class="g-icon"><svg class="ico"><use href="#i-bolt"></use></svg></span> Entrega em até 2 horas</div>
+                <div class="g-item"><span class="g-icon"><svg class="ico"><use href="#i-bolt"></use></svg></span> Pronto em menos de 5 minutos</div>
                 <div class="g-item"><span class="g-icon"><svg class="ico"><use href="#i-chat"></use></svg></span> Suporte via WhatsApp</div>
                 <div class="g-item"><span class="g-icon"><svg class="ico"><use href="#i-lock"></use></svg></span> Dados 100% seguros</div>
             </div>
@@ -5966,9 +5966,9 @@
                     <span class="faq-q-text">⏱️ Em quanto tempo recebo meu currículo?</span>
                     <div class="faq-icon">+</div>
                 </div>
-                <div class="faq-a">Seu currículo é entregue em até <strong>2 horas</strong> após a confirmação do
-                    pagamento, diretamente no seu WhatsApp. Em horários de pico pode levar um pouco mais, mas sempre
-                    comunicamos!</div>
+                <div class="faq-a">Seu currículo fica pronto em <strong>menos de 5 minutos</strong> após a
+                    confirmação do pagamento — o PDF é gerado automaticamente e liberado na hora, com confirmação
+                    também pelo seu WhatsApp.</div>
             </div>
 
             <div class="faq-item" onclick="toggleFaq(this)">
@@ -7219,9 +7219,9 @@
             const observer = new IntersectionObserver(entries => {
                 if (entries[0].isIntersecting && !animado) {
                     animado = true;
-                    // Stat 2h
+                    // Stat 5min
                     const stat2 = document.querySelectorAll('.stat .num')[1];
-                    if (stat2) { stat2.innerHTML = '0<em>h</em>'; countUp(stat2, 2, '<em>h</em>', '', 1000); }
+                    if (stat2) { stat2.innerHTML = '0<em>min</em>'; countUp(stat2, 5, '<em>min</em>', '', 1000); }
                     // Stat R$9
                     const stat3 = document.querySelectorAll('.stat .num')[2];
                     if (stat3) { stat3.innerHTML = '<em>R$</em>0'; countUp(stat3, 9, '', '<em>R$</em>', 1200); }
