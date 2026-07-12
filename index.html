@@ -505,6 +505,132 @@
             margin-top: 4px;
         }
 
+        /* ══ SELO DE VELOCIDADE ══ */
+        .speed-banner {
+            position: relative;
+            background: linear-gradient(160deg, #060E1C 0%, #0D1F3C 60%, #0E2347 100%);
+            padding: 52px 32px;
+            overflow: hidden;
+        }
+
+        .speed-grid {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image: linear-gradient(rgba(255, 255, 255, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .03) 1px, transparent 1px);
+            background-size: 46px 46px;
+            mask-image: radial-gradient(ellipse 80% 100% at 50% 50%, black, transparent);
+        }
+
+        .speed-inner {
+            position: relative;
+            z-index: 2;
+            max-width: 780px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            text-align: left;
+        }
+
+        .speed-frame {
+            position: relative;
+            flex-shrink: 0;
+            width: 92px;
+            height: 92px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            background: rgba(255, 122, 47, .08);
+            border: 1px solid rgba(255, 122, 47, .25);
+        }
+
+        .speed-corner {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--laranja2);
+        }
+
+        .speed-corner.tl {
+            top: -6px;
+            left: -6px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .speed-corner.tr {
+            top: -6px;
+            right: -6px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .speed-corner.bl {
+            bottom: -6px;
+            left: -6px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .speed-corner.br {
+            bottom: -6px;
+            right: -6px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .speed-ico {
+            font-size: 2.6rem;
+            animation: speedPulse 1.8s ease-in-out infinite;
+            filter: drop-shadow(0 0 12px rgba(255, 122, 47, .6));
+        }
+
+        @keyframes speedPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.12);
+            }
+        }
+
+        .speed-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--laranja2);
+            letter-spacing: .5px;
+            margin-bottom: 8px;
+        }
+
+        .speed-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(1.25rem, 2.6vw, 1.85rem);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.28;
+            margin-bottom: 8px;
+        }
+
+        .speed-sub {
+            font-size: .92rem;
+            color: rgba(255, 255, 255, .6);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 640px) {
+            .speed-inner {
+                flex-direction: column;
+                text-align: center;
+                gap: 18px;
+            }
+        }
+
         /* ══ FAIXA MOTIVACIONAL ══ */
         .faixa-mot {
             background: linear-gradient(135deg, var(--laranja), var(--laranja2));
@@ -650,6 +776,27 @@
             font-size: .8rem;
             color: var(--sub);
             line-height: 1.5;
+        }
+
+        .step-time {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .68rem;
+            font-weight: 600;
+            color: var(--azul3);
+            background: rgba(36, 86, 164, .08);
+            border: 1px solid rgba(36, 86, 164, .2);
+            padding: 4px 10px;
+            border-radius: 100px;
+            margin-top: 10px;
+        }
+
+        .step-time-auto {
+            color: var(--laranja);
+            background: rgba(255, 122, 47, .1);
+            border-color: rgba(255, 122, 47, .3);
         }
 
         /* ══ DEPOIMENTOS ══ */
@@ -4945,6 +5092,26 @@
         </div>
     </section>
 
+    <!-- SELO DE VELOCIDADE -->
+    <section class="speed-banner">
+        <div class="speed-grid"></div>
+        <div class="speed-inner">
+            <div class="speed-frame">
+                <span class="speed-corner tl"></span>
+                <span class="speed-corner tr"></span>
+                <span class="speed-corner bl"></span>
+                <span class="speed-corner br"></span>
+                <div class="speed-ico">⚡</div>
+            </div>
+            <div class="speed-copy">
+                <div class="speed-tag">&lt;/&gt; tempo_de_entrega</div>
+                <h2 class="speed-title">Seu currículo pronto em <span class="grad">menos de 5 minutos</span></h2>
+                <p class="speed-sub">Preencha o formulário, pague via PIX e baixe na hora — tudo automático, sem
+                    esperar equipe.</p>
+            </div>
+        </div>
+    </section>
+
     <!-- FAIXA MOTIVACIONAL -->
     <div class="faixa-mot">
         <p>✨ Não deixe sua carreira parada por falta de um currículo profissional &nbsp;—&nbsp; <em>Invista em você
@@ -4981,7 +5148,7 @@
         <div style="text-align:center">
             <div class="eyebrow">Processo simples</div>
             <h2 class="s-title">Como funciona?</h2>
-            <p class="s-sub">Em 4 passos rápidos você tem um currículo profissional pronto.</p>
+            <p class="s-sub">4 passos, um cronômetro: do preenchimento ao PDF em menos de 5 minutos.</p>
         </div>
         <div class="steps">
             <div class="step">
@@ -4991,6 +5158,7 @@
                 </div>
                 <h3>Escolha o plano</h3>
                 <p>Selecione Básico ou Premium com foto</p>
+                <div class="step-time">⏱ ~30 seg</div>
             </div>
             <div class="step">
                 <div class="step-circle">
@@ -4999,6 +5167,7 @@
                 </div>
                 <h3>Preencha os dados</h3>
                 <p>Suas experiências, formação e habilidades</p>
+                <div class="step-time">⏱ ~2 min</div>
             </div>
             <div class="step">
                 <div class="step-circle">
@@ -5006,15 +5175,17 @@
                     <div class="step-ico"><svg class="ico"><use href="#i-card"></use></svg></div>
                 </div>
                 <h3>Pague via PIX</h3>
-                <p>Pagamento rápido e seguro</p>
+                <p>Aprovação automática, sem espera</p>
+                <div class="step-time step-time-auto">⚡ Instantâneo</div>
             </div>
             <div class="step">
                 <div class="step-circle">
                     <div class="step-n">4</div>
                     <div class="step-ico"><svg class="ico"><use href="#i-send"></use></svg></div>
                 </div>
-                <h3>Receba no WhatsApp</h3>
-                <p>PDF de alta qualidade no seu número</p>
+                <h3>Receba na hora</h3>
+                <p>PDF liberado pra baixar + confirmação no WhatsApp</p>
+                <div class="step-time step-time-auto">⚡ Automático</div>
             </div>
         </div>
     </section>
