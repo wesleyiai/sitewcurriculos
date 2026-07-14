@@ -7501,6 +7501,7 @@
                 // ele não ficar esperando à toa.
                 curriculoPdfDataUri = pdfDataUri;
                 revelarBotaoDownloadCurriculo();
+                if (window.__WCV_HEADLESS__) window.__WCV_RENDER_DONE__ = true;
 
                 // Montar experiências em texto
                 let expTexto = d.exps.length
@@ -8405,6 +8406,32 @@
             document.addEventListener('DOMContentLoaded', handlePagamentoRetorno);
         } else {
             handlePagamentoRetorno();
+        }
+
+        // ══ RENDER HEADLESS (bot do WhatsApp, via Puppeteer) ══
+        // Só ativa se window.__WCV_RENDER_PAYLOAD__ foi injetado antes da
+        // página carregar (page.evaluateOnNewDocument) — um visitante real
+        // nunca tem essa variável setada, não precisa de flag pública nem
+        // de parâmetro na URL. Gera os mesmos PDFs que o cliente geraria no
+        // navegador, pra entrega automática por WhatsApp quando o pagamento
+        // for confirmado. Ver api/webhook-infinitepay.js e o bot em
+        // "Grupo Compras e Vendas Bot" (src/wcurriculosPdf.js).
+        function handleRenderHeadless() {
+            if (!window.__WCV_RENDER_PAYLOAD__) return;
+            window.__WCV_HEADLESS__ = true;
+            const payload = window.__WCV_RENDER_PAYLOAD__;
+            plano = payload.plano;
+            dados = payload.dados;
+            cartaApresentacao = Boolean(payload.cartaApresentacao);
+            mensagemVagas = Boolean(payload.mensagemVagas);
+            checklistEntrevista = Boolean(payload.checklistEntrevista);
+            finalizarPedidoPago();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', handleRenderHeadless);
+        } else {
+            handleRenderHeadless();
         }
     </script>
 </body>
