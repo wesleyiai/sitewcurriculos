@@ -1911,6 +1911,70 @@
             transform: translateY(-2px);
         }
 
+        .pag-pix-box {
+            background: #fff;
+            border: 1.5px dashed rgba(36, 86, 164, .35);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin: 0 0 20px;
+            text-align: center;
+        }
+
+        .pag-pix-label {
+            display: block;
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--sub);
+            margin-bottom: 6px;
+        }
+
+        .pag-pix-chave {
+            display: block;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--azul3);
+            word-break: break-all;
+            user-select: all;
+            cursor: text;
+        }
+
+        .pag-aviso-entrega {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(255, 122, 47, .1);
+            border: 1.5px solid rgba(255, 122, 47, .5);
+            border-radius: 14px;
+            padding: 16px 18px;
+            margin: 0 0 20px;
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--texto);
+            text-align: center;
+            animation: fadeInUp .3s ease;
+        }
+
+        .pag-contador {
+            text-align: center;
+            font-size: .85rem;
+            font-weight: 600;
+            color: var(--sub);
+            margin: 0 0 20px;
+        }
+
+        .pag-contador-valor {
+            display: inline-block;
+            font-family: 'Sora', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--azul);
+            margin-left: 6px;
+        }
+
         /* ══ SUCESSO ══ */
         #secao-sucesso {
             display: none;
@@ -5857,6 +5921,12 @@
                     📥 Baixar meu currículo em PDF
                 </button>
             </div>
+            <div id="curriculo-share-wrap" style="display:none;margin:0 0 20px;">
+                <button id="btn-compartilhar-curriculo" class="btn-main" onclick="compartilharCurriculoWhatsapp()"
+                    style="font-size:1.05rem;background:#25D366;">
+                    📤 Enviar meu currículo no WhatsApp
+                </button>
+            </div>
             <div id="carta-download-wrap" style="display:none;margin:0 0 20px;">
                 <button id="btn-baixar-carta" class="btn-main" onclick="baixarCartaPdf()"
                     style="font-size:1.05rem;">
@@ -6889,9 +6959,43 @@
         function revelarBotaoDownloadCurriculo() {
             const wrap = document.getElementById('curriculo-download-wrap');
             const loading = document.getElementById('curriculo-loading');
+            const shareWrap = document.getElementById('curriculo-share-wrap');
             if (wrap) wrap.style.display = 'block';
             if (loading) loading.style.display = 'none';
+            // Só mostra o botão de compartilhar se o navegador suportar
+            // compartilhar arquivo (Web Share API nível 2) — em navegadores sem
+            // suporte (a maioria de desktop), o botão de baixar acima já resolve.
+            if (shareWrap && navigator.canShare && navigator.canShare({ files: [new File([''], 'x.pdf', { type: 'application/pdf' })] })) {
+                shareWrap.style.display = 'block';
+            }
             baixarCurriculoPdf();
+        }
+
+        // Entrega principal do currículo: o próprio cliente compartilha o PDF
+        // pelo WhatsApp dele (share sheet nativo), escolhendo o contato —
+        // inclusive pode mandar pro número do WCurrículos como comprovante.
+        // Não depende do bot/VM entregar automaticamente.
+        function compartilharCurriculoWhatsapp() {
+            if (!curriculoPdfDataUri) return;
+            try {
+                const base64 = curriculoPdfDataUri.split(',')[1];
+                const byteChars = atob(base64);
+                const byteArr = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                    byteArr[i] = byteChars.charCodeAt(i);
+                }
+                const nomeArquivo = `curriculo_${(dados.nome || 'wcurriculos').replace(/\s+/g, '_')}.pdf`;
+                const file = new File([byteArr], nomeArquivo, { type: 'application/pdf' });
+                navigator.share({
+                    files: [file],
+                    title: 'Meu currículo - WCurrículos',
+                    text: 'Segue meu currículo em PDF!',
+                }).catch((err) => {
+                    console.warn('Compartilhamento cancelado ou bloqueado:', err);
+                });
+            } catch (e) {
+                console.error('Erro ao compartilhar currículo:', e);
+            }
         }
 
         // ══ FAQ TOGGLE ══
@@ -8191,6 +8295,7 @@
                 const p = planos[plano];
                 document.getElementById('pag-tag').textContent = p.nome;
                 atualizarValorExibicao();
+                document.getElementById('pag-pix-chave').textContent = PIX_KEY;
                 const pagValWrap = document.getElementById('pag-val-wrap');
                 pagValWrap.classList.remove('pag-val-reveal');
                 void pagValWrap.offsetWidth; // reinicia a animação a cada revelação
@@ -8513,6 +8618,122 @@
             document.addEventListener('DOMContentLoaded', handleRenderHeadless);
         } else {
             handleRenderHeadless();
+        }
+
+        // ══ ENTREGA POR TEMPO (chave Pix estática, sem verificação automática de
+        // pagamento) ══ — substitui iniciarPagamento() no fluxo normal do
+        // cliente. iniciarPagamento/checkPaymentParams/handlePagamentoRetorno
+        // acima ficam intocados, só não são mais chamados por nenhum botão.
+
+        const PIX_KEY = '1f62c9ab-f8cc-43b1-946a-e619a7f135e0';
+
+        let contadorEntregaInterval = null;
+
+        function copiarChavePix() {
+            const btn = document.getElementById('btn-confirmar');
+            if (btn.disabled) return;
+            btn.disabled = true;
+            navigator.clipboard.writeText(PIX_KEY)
+                .then(() => setPagStatus('Chave Pix copiada! Cole no app do seu banco.', false))
+                .catch(() => setPagStatus('Não copiou automaticamente — toque e segure a chave acima pra copiar manualmente.', true));
+            // A cópia é só conveniência: mesmo que o clipboard falhe (comum em
+            // alguns navegadores/webviews), o pedido tem que ser registrado do
+            // mesmo jeito, senão o cliente nunca recebe o currículo.
+            criarPedidoEntregaAutomatica();
+        }
+
+        function criarPedidoEntregaAutomatica() {
+            const chkCarta = document.getElementById('chk-carta');
+            cartaApresentacao = Boolean(chkCarta && chkCarta.checked);
+            const chkMensagem = document.getElementById('chk-mensagem');
+            mensagemVagas = Boolean(chkMensagem && chkMensagem.checked);
+            const chkChecklist = document.getElementById('chk-checklist');
+            checklistEntrevista = Boolean(chkChecklist && chkChecklist.checked);
+
+            localStorage.setItem('cvw_plano', plano);
+            localStorage.setItem('cvw_dados', JSON.stringify(dados));
+            localStorage.setItem('cvw_carta', cartaApresentacao ? '1' : '0');
+            localStorage.setItem('cvw_mensagem', mensagemVagas ? '1' : '0');
+            localStorage.setItem('cvw_checklist', checklistEntrevista ? '1' : '0');
+
+            fetch('/api/create-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plano, dados, cartaApresentacao, mensagemVagas, checklistEntrevista }),
+            })
+                .then((resp) => resp.json().then((data) => ({ ok: resp.ok, data })))
+                .then(({ ok, data }) => {
+                    if (!ok || !data.entregarEm || !data.orderNsu) throw new Error(data.error || 'Erro ao registrar pedido');
+                    localStorage.setItem('cvw_entrega_orderNsu', data.orderNsu);
+                    localStorage.setItem('cvw_entrega_em', data.entregarEm);
+                    mostrarEntregaEmAndamento(data.entregarEm);
+                })
+                .catch(() => {
+                    setPagStatus('Falha ao registrar o pedido no servidor. Recarregue a página e tente copiar a chave de novo.', true);
+                    document.getElementById('btn-confirmar').disabled = false;
+                });
+        }
+
+        function mostrarEntregaEmAndamento(entregarEmIso) {
+            document.getElementById('btn-confirmar').style.display = 'none';
+            document.getElementById('pag-aviso-entrega').style.display = 'flex';
+            document.getElementById('pag-contador').style.display = 'block';
+            iniciarContadorEntrega(entregarEmIso);
+        }
+
+        function iniciarContadorEntrega(entregarEmIso) {
+            const alvo = new Date(entregarEmIso).getTime();
+            const el = document.getElementById('pag-contador-valor');
+            if (contadorEntregaInterval) clearInterval(contadorEntregaInterval);
+            function tick() {
+                const restanteMs = alvo - Date.now();
+                if (restanteMs <= 0) {
+                    el.textContent = '00:00';
+                    setPagStatus('Currículo a caminho! Fique de olho no WhatsApp. 🎉', false);
+                    clearInterval(contadorEntregaInterval);
+                    return;
+                }
+                const s = Math.ceil(restanteMs / 1000);
+                el.textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+            }
+            tick();
+            contadorEntregaInterval = setInterval(tick, 1000);
+        }
+
+        // Sobrevive a reload/fechar-e-reabrir a aba enquanto a entrega ainda
+        // está em andamento — sem isso o cliente perderia o contador e a
+        // referência ao pedido já criado ao atualizar a página.
+        function restaurarEntregaEmAndamento() {
+            const orderNsu = localStorage.getItem('cvw_entrega_orderNsu');
+            const entregarEm = localStorage.getItem('cvw_entrega_em');
+            if (!orderNsu || !entregarEm) return;
+            const savedPlano = localStorage.getItem('cvw_plano');
+            const savedDados = localStorage.getItem('cvw_dados');
+            if (!savedPlano || !savedDados) return;
+
+            plano = savedPlano;
+            dados = JSON.parse(savedDados);
+            cartaApresentacao = localStorage.getItem('cvw_carta') === '1';
+            mensagemVagas = localStorage.getItem('cvw_mensagem') === '1';
+            checklistEntrevista = localStorage.getItem('cvw_checklist') === '1';
+
+            const secCompartilhar = document.getElementById('secao-compartilhar');
+            if (secCompartilhar) secCompartilhar.style.display = 'none';
+
+            const p = planos[plano];
+            if (!p) return;
+            document.getElementById('pag-tag').textContent = p.nome;
+            document.getElementById('pag-pix-chave').textContent = PIX_KEY;
+            atualizarValorExibicao();
+
+            document.getElementById('secao-pagamento').style.display = 'block';
+            mostrarEntregaEmAndamento(entregarEm);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', restaurarEntregaEmAndamento);
+        } else {
+            restaurarEntregaEmAndamento();
         }
     </script>
 </body>

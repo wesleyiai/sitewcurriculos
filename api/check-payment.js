@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
         try {
           await salvarPedido(order_nsu, { ...pedido, paid: true, paidAt: new Date().toISOString() });
         } catch (err) {
-          console.error('Falha ao atualizar pedido no Blob:', err);
+          console.error('Falha ao atualizar pedido:', err);
         }
       }
     }

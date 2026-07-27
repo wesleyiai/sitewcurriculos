@@ -79,7 +79,7 @@ module.exports = async (req, res) => {
       try {
         await salvarPedido(orderNsu, { plano, dados, cartaApresentacao, mensagemVagas, checklistEntrevista, paid: false, createdAt: new Date().toISOString() });
       } catch (err) {
-        console.error('Falha ao salvar pedido no Blob:', err);
+        console.error('Falha ao salvar pedido:', err);
       }
     }
 
