@@ -5100,6 +5100,20 @@
 
 <body>
 
+    <script>
+        // ══ SISTEMA DE INDICAÇÃO — captura o ?ref= o quanto antes ══
+        // O "código" é simplesmente o telefone de quem indicou, só dígitos
+        // (sem gerar nada novo). Guardado em localStorage pra sobreviver até
+        // o pagamento, onde vira o campo `refCode` enviado a /api/create-link.
+        (function capturarIndicacao() {
+            const params = new URLSearchParams(window.location.search);
+            const ref = (params.get('ref') || '').replace(/\D/g, '');
+            if (ref.length >= 8 && ref.length <= 13) {
+                localStorage.setItem('cvw_ref_code', ref);
+            }
+        })();
+    </script>
+
     <!-- ÍCONES SVG (sprite reutilizável, evita depender de emojis do SO) -->
     <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
         <defs>
@@ -6030,6 +6044,8 @@
             <div class="pag-card">
                 <div class="pag-reveal-kicker">🎉 Seu currículo está pronto! Aqui está o seu investimento:</div>
                 <div class="pag-tag" id="pag-tag">Plano</div>
+                <div class="pag-desconto-nota" id="pag-desconto-nota" style="display:none">🎉 Desconto de indicação de
+                    20% aplicado!</div>
                 <div class="pag-val" id="pag-val-wrap">R$ <em id="pag-valor">0,00</em></div>
                 <div class="pag-reveal-note"><svg class="ico"><use href="#i-shield"></use></svg>Valor final. Sem taxas escondidas.</div>
                 <label class="pag-bump" for="chk-carta">
@@ -6412,7 +6428,14 @@
             const chkCarta = document.getElementById('chk-carta');
             const chkMensagem = document.getElementById('chk-mensagem');
             const chkChecklist = document.getElementById('chk-checklist');
-            let total = parseFloat(p.preco.replace(',', '.'));
+            // Preview do desconto de indicação (20% só no plano, nunca nos
+            // bumps) — o valor real e definitivo é sempre recalculado e
+            // travado no servidor, em api/create-link.js.
+            let precoPlano = parseFloat(p.preco.replace(',', '.'));
+            if (localStorage.getItem('cvw_ref_code')) {
+                precoPlano *= 0.8;
+            }
+            let total = precoPlano;
             if (chkCarta && chkCarta.checked) total += CARTA_PRECO;
             if (chkMensagem && chkMensagem.checked) total += MENSAGEM_PRECO;
             if (chkChecklist && chkChecklist.checked) total += CHECKLIST_PRECO;
@@ -8452,7 +8475,8 @@
                 const p = planos[plano];
                 document.getElementById('pag-tag').textContent = p.nome;
                 atualizarValorExibicao();
-                document.getElementById('pag-pix-chave').textContent = PIX_KEY;
+                const notaDesconto = document.getElementById('pag-desconto-nota');
+                if (notaDesconto) notaDesconto.style.display = localStorage.getItem('cvw_ref_code') ? 'block' : 'none';
                 const pagValWrap = document.getElementById('pag-val-wrap');
                 pagValWrap.classList.remove('pag-val-reveal');
                 void pagValWrap.offsetWidth; // reinicia a animação a cada revelação
@@ -8626,7 +8650,10 @@
             fetch('/api/create-link', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plano, dados, cartaApresentacao, mensagemVagas, checklistEntrevista }),
+                body: JSON.stringify({
+                    plano, dados, cartaApresentacao, mensagemVagas, checklistEntrevista,
+                    refCode: localStorage.getItem('cvw_ref_code') || null,
+                }),
             })
                 .then((resp) => resp.json().then((data) => ({ ok: resp.ok, data })))
                 .then(({ ok, data }) => {
