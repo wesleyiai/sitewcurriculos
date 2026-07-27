@@ -5896,23 +5896,13 @@
                         <div class="pag-bump-desc">O que levar, o que perguntar pro recrutador e os erros mais comuns a evitar. Um guia rápido pra chegar mais confiante.</div>
                     </div>
                 </label>
-                <div class="pag-pix-box" id="pag-pix-box">
-                    <span class="pag-pix-label">Chave Pix (copia e cola)</span>
-                    <code class="pag-pix-chave" id="pag-pix-chave">1f62c9ab-f8cc-43b1-946a-e619a7f135e0</code>
-                </div>
-                <p class="pag-status" id="pag-status">Copie a chave Pix acima e pague o valor exibido no app do seu banco.</p>
-                <button id="btn-confirmar" onclick="copiarChavePix()" style="display:flex">
+                <p class="pag-status" id="pag-status">Você será levado para um checkout seguro (Pix ou cartão). Seu currículo é liberado automaticamente assim que o pagamento for confirmado.</p>
+                <button id="btn-confirmar" onclick="iniciarPagamento()" style="display:flex">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
                     </svg>
-                    Copiar chave PIX
+                    Pagar agora
                 </button>
-                <div class="pag-aviso-entrega" id="pag-aviso-entrega" style="display:none">
-                    ⏰ Pague e em até <strong>10 minutos</strong> você receberá seu currículo em PDF direto no WhatsApp!
-                </div>
-                <div class="pag-contador" id="pag-contador" style="display:none">
-                    Tempo estimado de entrega:<span class="pag-contador-valor" id="pag-contador-valor">10:00</span>
-                </div>
             </div>
         </div>
     </section>
@@ -5929,6 +5919,12 @@
                 <button id="btn-baixar-curriculo" class="btn-main" onclick="baixarCurriculoPdf()"
                     style="font-size:1.05rem;">
                     📥 Baixar meu currículo em PDF
+                </button>
+            </div>
+            <div id="curriculo-share-wrap" style="display:none;margin:0 0 20px;">
+                <button id="btn-compartilhar-curriculo" class="btn-main" onclick="compartilharCurriculoWhatsapp()"
+                    style="font-size:1.05rem;background:#25D366;">
+                    📤 Enviar meu currículo no WhatsApp
                 </button>
             </div>
             <div id="carta-download-wrap" style="display:none;margin:0 0 20px;">
@@ -6963,9 +6959,43 @@
         function revelarBotaoDownloadCurriculo() {
             const wrap = document.getElementById('curriculo-download-wrap');
             const loading = document.getElementById('curriculo-loading');
+            const shareWrap = document.getElementById('curriculo-share-wrap');
             if (wrap) wrap.style.display = 'block';
             if (loading) loading.style.display = 'none';
+            // Só mostra o botão de compartilhar se o navegador suportar
+            // compartilhar arquivo (Web Share API nível 2) — em navegadores sem
+            // suporte (a maioria de desktop), o botão de baixar acima já resolve.
+            if (shareWrap && navigator.canShare && navigator.canShare({ files: [new File([''], 'x.pdf', { type: 'application/pdf' })] })) {
+                shareWrap.style.display = 'block';
+            }
             baixarCurriculoPdf();
+        }
+
+        // Entrega principal do currículo: o próprio cliente compartilha o PDF
+        // pelo WhatsApp dele (share sheet nativo), escolhendo o contato —
+        // inclusive pode mandar pro número do WCurrículos como comprovante.
+        // Não depende do bot/VM entregar automaticamente.
+        function compartilharCurriculoWhatsapp() {
+            if (!curriculoPdfDataUri) return;
+            try {
+                const base64 = curriculoPdfDataUri.split(',')[1];
+                const byteChars = atob(base64);
+                const byteArr = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                    byteArr[i] = byteChars.charCodeAt(i);
+                }
+                const nomeArquivo = `curriculo_${(dados.nome || 'wcurriculos').replace(/\s+/g, '_')}.pdf`;
+                const file = new File([byteArr], nomeArquivo, { type: 'application/pdf' });
+                navigator.share({
+                    files: [file],
+                    title: 'Meu currículo - WCurrículos',
+                    text: 'Segue meu currículo em PDF!',
+                }).catch((err) => {
+                    console.warn('Compartilhamento cancelado ou bloqueado:', err);
+                });
+            } catch (e) {
+                console.error('Erro ao compartilhar currículo:', e);
+            }
         }
 
         // ══ FAQ TOGGLE ══
