@@ -6129,6 +6129,35 @@
                 </svg>
                 Falar com WCurrículos no WhatsApp
             </a>
+            <div id="indicacao-wrap" style="display:none;margin-top:20px;">
+                <div
+                    style="background:linear-gradient(135deg,#0D1F3C,#16294f);border:1px solid rgba(255,122,47,.35);border-radius:16px;padding:24px 28px;">
+                    <div style="font-size:2rem;margin-bottom:8px;">🎁</div>
+                    <div style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:6px;">
+                        Indique e ganhe 20%</div>
+                    <div style="font-size:.88rem;color:rgba(255,255,255,.65);margin-bottom:16px;">Compartilhe seu link:
+                        seu amigo ganha 20% de desconto, e na sua próxima compra você também ganha.</div>
+                    <div id="indicacao-link"
+                        style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:.82rem;color:#fff;word-break:break-all;user-select:all;">
+                    </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                        <button onclick="copiarLinkIndicacao()"
+                            style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);padding:12px 20px;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;transition:.2s;">
+                            🔗 Copiar link
+                        </button>
+                        <a id="indicacao-wpp" href="#" target="_blank"
+                            style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:12px 20px;border-radius:10px;font-size:.88rem;font-weight:700;text-decoration:none;transition:.2s;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                                <path
+                                    d="M11.998 0C5.373 0 0 5.373 0 11.998c0 2.117.554 4.099 1.523 5.82L.057 23.521l5.83-1.527A11.95 11.95 0 0 0 12 24c6.625 0 12-5.373 12-12 0-6.626-5.375-12.002-12.002-12.002z" />
+                            </svg>
+                            Compartilhar no WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
             <div id="ebook-bonus-wrap" style="display:none;margin-top:20px;">
                 <div
                     style="background:linear-gradient(135deg,#1a0800,#3d1500);border:1px solid rgba(255,122,47,.4);border-radius:16px;padding:24px 28px;margin-bottom:16px;">
@@ -6716,6 +6745,7 @@
             }
             const s = document.getElementById('secao-sucesso');
             s.style.display = 'block';
+            popularLinkIndicacao();
             // Mostrar bônus eBook se for Premium
             if (plano === 'premium') {
                 const ebookWrap = document.getElementById('ebook-bonus-wrap');
@@ -6733,6 +6763,35 @@
             if (!wppWindow) {
                 console.warn('Pop-up do WhatsApp bloqueado pelo navegador — cliente precisa clicar no botão manual.');
             }
+        }
+
+        // ══ SISTEMA DE INDICAÇÃO — link pessoal na tela de sucesso ══
+        // O "código" de indicação é o próprio telefone do cliente (já
+        // coletado no formulário), sem gerar nada novo. Ver ?ref= em
+        // capturarIndicacao() (logo após <body>) e o desconto aplicado em
+        // api/create-link.js.
+        function popularLinkIndicacao() {
+            const telefone = (dados.tel || '').replace(/\D/g, '');
+            if (!telefone) return;
+            const linkIndicacao = `${window.location.origin}/?ref=${telefone}`;
+            const linkEl = document.getElementById('indicacao-link');
+            if (linkEl) linkEl.textContent = linkIndicacao;
+            const msg = encodeURIComponent(
+                `Acabei de fazer meu currículo profissional na WCurrículos e recomendo! ` +
+                `Use meu link e ganhe 20% de desconto: ${linkIndicacao}`
+            );
+            const wppLink = document.getElementById('indicacao-wpp');
+            if (wppLink) wppLink.href = `https://wa.me/?text=${msg}`;
+            const wrap = document.getElementById('indicacao-wrap');
+            if (wrap) wrap.style.display = 'block';
+        }
+
+        function copiarLinkIndicacao() {
+            const linkEl = document.getElementById('indicacao-link');
+            if (!linkEl || !linkEl.textContent) return;
+            navigator.clipboard.writeText(linkEl.textContent).catch(() => {
+                console.warn('Não foi possível copiar automaticamente — o link já fica selecionável no texto.');
+            });
         }
 
         // Equivalente a finalizarPedidoPago(), mas pro fluxo headless do bot

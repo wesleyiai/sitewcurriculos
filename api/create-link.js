@@ -1,5 +1,16 @@
 const crypto = require('crypto');
-const { salvarPedido } = require('./_lib/pedidos');
+const { salvarPedido, verificarIndicacaoAnterior } = require('./_lib/pedidos');
+
+// Sistema de indicação: 20% de desconto pra quem foi indicado, e 20% pra
+// quem indicou (aplicado automaticamente na compra seguinte dela mesma,
+// já que hoje não há como avisar o indicador na hora — ver
+// verificarIndicacaoAnterior). Nunca soma os dois casos (máximo 20% no
+// total), e nunca incide sobre os order bumps, só no valor do plano.
+const DESCONTO_INDICACAO = 0.20;
+
+function apenasDigitos(valor) {
+  return String(valor || '').replace(/\D/g, '');
+}
 
 // O preço nunca vem do navegador: o cliente só manda qual plano escolheu,
 // e o valor cobrado é sempre o definido aqui no servidor.
@@ -41,7 +52,23 @@ module.exports = async (req, res) => {
   const origin = req.headers.origin || `https://${req.headers.host}`;
   const orderNsu = crypto.randomUUID();
 
-  const items = [{ quantity: 1, price: item.cents, description: item.description }];
+  // Indicação: refCode é o telefone (só dígitos) de quem indicou. Ignorado
+  // se mal formado ou se for autoindicação (mesmo telefone do comprador).
+  const refCodeBruto = req.body && req.body.refCode;
+  const refCode = apenasDigitos(refCodeBruto);
+  const telefoneComprador = apenasDigitos(dados && dados.tel);
+  const refCodeValido = refCode.length >= 8 && refCode.length <= 13 && refCode !== telefoneComprador;
+
+  const jaIndicouAntes = telefoneComprador
+    ? await verificarIndicacaoAnterior(telefoneComprador)
+    : false;
+
+  const temDesconto = refCodeValido || jaIndicouAntes;
+  const precoComDesconto = temDesconto
+    ? Math.round(item.cents * (1 - DESCONTO_INDICACAO))
+    : item.cents;
+
+  const items = [{ quantity: 1, price: precoComDesconto, description: item.description }];
   if (cartaApresentacao) {
     items.push({ quantity: 1, price: CARTA_APRESENTACAO.cents, description: CARTA_APRESENTACAO.description });
   }
@@ -77,7 +104,12 @@ module.exports = async (req, res) => {
     // reconstruir o currículo depois, sem depender de sessionStorage/localStorage.
     if (dados) {
       try {
-        await salvarPedido(orderNsu, { plano, dados, cartaApresentacao, mensagemVagas, checklistEntrevista, paid: false, createdAt: new Date().toISOString() });
+        await salvarPedido(orderNsu, {
+          plano, dados, cartaApresentacao, mensagemVagas, checklistEntrevista,
+          paid: false,
+          refCode: refCodeValido ? refCode : null,
+          createdAt: new Date().toISOString(),
+        });
       } catch (err) {
         console.error('Falha ao salvar pedido:', err);
       }

@@ -51,4 +51,26 @@ async function buscarPedido(orderNsu) {
   }
 }
 
-module.exports = { salvarPedido, buscarPedido };
+// Sistema de indicação: diz se esse telefone já indicou alguém com sucesso
+// antes (usado por create-link.js pra liberar o desconto de quem indicou
+// na própria compra seguinte). Timeout curto e fallback seguro pra `false`
+// em qualquer erro — nunca pode travar o checkout por causa disso.
+async function verificarIndicacaoAnterior(telefone) {
+  if (!BASE_URL || !SECRET || !telefone) return false;
+  const { signal, cancel } = withTimeout(3000);
+  try {
+    const resp = await fetch(`${BASE_URL}/referral-check/${encodeURIComponent(telefone)}`, {
+      headers: { Authorization: `Bearer ${SECRET}` },
+      signal,
+    });
+    if (!resp.ok) return false;
+    const data = await resp.json();
+    return Boolean(data && data.jaIndicouComSucesso);
+  } catch (err) {
+    return false;
+  } finally {
+    cancel();
+  }
+}
+
+module.exports = { salvarPedido, buscarPedido, verificarIndicacaoAnterior };
