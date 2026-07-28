@@ -6070,6 +6070,15 @@
                     </div>
                 </label>
                 <p class="pag-status" id="pag-status">Você será levado para um checkout seguro (Pix ou cartão). Seu currículo é liberado automaticamente assim que o pagamento for confirmado.</p>
+                <div
+                    style="display:flex;align-items:flex-start;gap:10px;background:#FFF3CD;border:2px solid #FF7A2F;border-radius:12px;padding:14px 16px;margin:0 0 18px;text-align:left;">
+                    <span style="font-size:1.3rem;line-height:1">⚠️</span>
+                    <div>
+                        <strong style="color:#8A4B00;">Depois de pagar, VOLTE para esta página.</strong>
+                        <div style="color:#8A4B00;font-size:.88rem;margin-top:2px;">Não feche esta aba — é aqui que
+                            seu currículo é liberado automaticamente após a confirmação do pagamento.</div>
+                    </div>
+                </div>
                 <button id="btn-confirmar" onclick="iniciarPagamento()" style="display:flex">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
@@ -6095,16 +6104,18 @@
                     🔄 Tentar novamente
                 </button>
             </div>
-            <div id="curriculo-download-wrap" style="display:none;margin:20px 0;">
+            <div id="curriculo-share-wrap" style="display:none;margin:20px 0 14px;">
+                <div style="font-size:.85rem;font-weight:800;color:#1da851;margin-bottom:10px;">👉 Recomendado —
+                    envie direto pro seu WhatsApp</div>
+                <button id="btn-compartilhar-curriculo" class="btn-main" onclick="compartilharCurriculoWhatsapp()"
+                    style="font-size:1.1rem;background:#25D366;animation:wppPulse 2.5s infinite;">
+                    📤 Enviar meu currículo no WhatsApp
+                </button>
+            </div>
+            <div id="curriculo-download-wrap" style="display:none;margin:0 0 20px;">
                 <button id="btn-baixar-curriculo" class="btn-main" onclick="baixarCurriculoPdf()"
                     style="font-size:1.05rem;">
                     📥 Baixar meu currículo em PDF
-                </button>
-            </div>
-            <div id="curriculo-share-wrap" style="display:none;margin:0 0 20px;">
-                <button id="btn-compartilhar-curriculo" class="btn-main" onclick="compartilharCurriculoWhatsapp()"
-                    style="font-size:1.05rem;background:#25D366;">
-                    📤 Enviar meu currículo no WhatsApp
                 </button>
             </div>
             <div id="carta-download-wrap" style="display:none;margin:0 0 20px;">
@@ -6127,7 +6138,7 @@
             </div>
             <div class="prazo">💬 Também confirmamos tudo pelo WhatsApp — qualquer dúvida, é só chamar.</div>
             <br>
-            <a id="btn-wpp-suc" href="#" target="_blank">
+            <a id="btn-wpp-suc" href="#" target="_blank" onclick="return abrirWhatsappSuporteComCurriculo(event)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path
                         d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
@@ -7294,6 +7305,39 @@
                 });
             } catch (e) {
                 console.error('Erro ao compartilhar currículo:', e);
+            }
+        }
+
+        // Botão "Falar com WCurrículos no WhatsApp": quando o navegador
+        // suporta Web Share API com arquivo, manda o PDF do currículo JUNTO
+        // com o texto com todos os dados (mesmo texto que iria no link
+        // wa.me) numa única mensagem — o suporte já recebe tudo de uma vez,
+        // sem o cliente precisar anexar o PDF separadamente depois. Se não
+        // suportar (a maioria dos navegadores desktop), cai no comportamento
+        // normal do link <a> (abre o chat só com o texto).
+        function abrirWhatsappSuporteComCurriculo(evt) {
+            if (!curriculoPdfDataUri || !navigator.canShare || !navigator.share) return true;
+            try {
+                const base64 = curriculoPdfDataUri.split(',')[1];
+                const byteChars = atob(base64);
+                const byteArr = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                    byteArr[i] = byteChars.charCodeAt(i);
+                }
+                const nomeArquivo = `curriculo_${(dados.nome || 'wcurriculos').replace(/\s+/g, '_')}.pdf`;
+                const file = new File([byteArr], nomeArquivo, { type: 'application/pdf' });
+                if (!navigator.canShare({ files: [file] })) return true;
+                evt.preventDefault();
+                navigator.share({
+                    files: [file],
+                    text: decodeURIComponent(montarMsgWhatsapp()),
+                }).catch((err) => {
+                    console.warn('Envio ao WCurrículos cancelado ou bloqueado:', err);
+                });
+                return false;
+            } catch (e) {
+                console.error('Erro ao preparar envio do currículo com dados:', e);
+                return true;
             }
         }
 
