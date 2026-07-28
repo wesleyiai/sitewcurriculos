@@ -1,0 +1,192 @@
+/* WCurrículos — guias de currículo por profissão (páginas de SEO) */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --navy: #0D1F3C;
+    --navy-2: #16294f;
+    --orange: #FF7A2F;
+    --text: #1f2937;
+    --sub: #5b6472;
+    --bg: #F7F8FA;
+    --card: #ffffff;
+    --line: #e7e9ee;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .logo { font-family: 'Sora', sans-serif; }
+
+a { color: var(--orange); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+
+/* Header */
+header.site-header {
+    background: var(--navy);
+    padding: 18px 0;
+}
+header.site-header .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.logo {
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+}
+.logo em { color: var(--orange); font-style: normal; }
+.header-cta {
+    background: var(--orange);
+    color: #fff !important;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    font-size: 0.82rem;
+    color: var(--sub);
+    padding: 16px 0 0;
+}
+.breadcrumb a { color: var(--sub); text-decoration: underline; }
+
+/* Hero */
+.hero { padding: 28px 0 8px; }
+.eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 10px;
+}
+h1 {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1.25;
+    margin-bottom: 14px;
+}
+.lead {
+    font-size: 1.05rem;
+    color: var(--sub);
+    max-width: 620px;
+}
+
+/* Content */
+article { padding: 24px 0 8px; }
+article h2 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--navy);
+    margin: 34px 0 14px;
+}
+article h2:first-child { margin-top: 0; }
+article p { margin-bottom: 14px; color: var(--text); }
+article ul { margin: 0 0 16px 0; padding-left: 0; list-style: none; }
+article ul li {
+    padding: 9px 0 9px 28px;
+    position: relative;
+    border-bottom: 1px solid var(--line);
+}
+article ul li:last-child { border-bottom: none; }
+article ul li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    color: var(--orange);
+    font-weight: 800;
+}
+.exemplo-box {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--orange);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 18px 0;
+    font-size: 0.95rem;
+    color: var(--sub);
+    font-style: italic;
+}
+.exemplo-box strong { color: var(--navy); font-style: normal; display: block; margin-bottom: 6px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* CTA box */
+.cta-box {
+    background: linear-gradient(135deg, var(--navy), var(--navy-2));
+    border-radius: 18px;
+    padding: 32px 28px;
+    text-align: center;
+    margin: 36px 0;
+}
+.cta-box h3 {
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+}
+.cta-box p {
+    color: rgba(255,255,255,.7);
+    font-size: 0.92rem;
+    margin-bottom: 20px;
+}
+.cta-btn {
+    display: inline-block;
+    background: var(--orange);
+    color: #fff !important;
+    font-weight: 800;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 1rem;
+    text-decoration: none !important;
+}
+
+/* Guides grid (hub page) */
+.guides-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 22px 0;
+}
+.guide-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px;
+    text-decoration: none !important;
+    display: block;
+    transition: border-color .15s, transform .15s;
+}
+.guide-card:hover { border-color: var(--orange); transform: translateY(-2px); }
+.guide-card .g-title { color: var(--navy); font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+.guide-card .g-desc { color: var(--sub); font-size: 0.85rem; }
+
+/* Footer */
+footer.site-footer {
+    padding: 28px 0 34px;
+    text-align: center;
+    color: var(--sub);
+    font-size: 0.82rem;
+    border-top: 1px solid var(--line);
+    margin-top: 20px;
+}
+footer.site-footer a { color: var(--sub); }
+
+@media (max-width: 560px) {
+    h1 { font-size: 1.5rem; }
+    .cta-box { padding: 26px 20px; }
+}
