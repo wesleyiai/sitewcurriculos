@@ -6088,6 +6088,13 @@
             <p>Seu currículo em PDF já está pronto! Baixe abaixo agora mesmo.</p>
             <div id="curriculo-loading" style="margin:16px 0;font-size:.9rem;color:var(--sub)">⏳ Gerando
                 seu PDF...</div>
+            <div id="curriculo-erro" style="display:none;margin:16px 0;">
+                <p style="font-size:.9rem;color:#ff6b6b;margin-bottom:10px;">⚠️ Não conseguimos gerar seu PDF
+                    agora. Isso pode acontecer por instabilidade do navegador — tente novamente.</p>
+                <button class="btn-main" onclick="tentarGerarCurriculoNovamente()" style="font-size:1rem;">
+                    🔄 Tentar novamente
+                </button>
+            </div>
             <div id="curriculo-download-wrap" style="display:none;margin:20px 0;">
                 <button id="btn-baixar-curriculo" class="btn-main" onclick="baixarCurriculoPdf()"
                     style="font-size:1.05rem;">
@@ -6429,6 +6436,15 @@
         // PDF do currículo já gerado, guardado aqui pra alimentar o botão
         // "Baixar meu currículo" (permite baixar de novo quantas vezes quiser).
         let curriculoPdfDataUri = null;
+        // Link do WhatsApp da tela de sucesso: só é aberto automaticamente
+        // depois que o PDF termina de gerar (ver revelarBotaoDownloadCurriculo),
+        // pra abrir o pop-up não tirar o foco da aba enquanto o html2canvas
+        // ainda está rodando (isso trava a geração em alguns celulares).
+        let linkWhatsappSucesso = null;
+        // Timer de segurança: se o PDF não ficar pronto em alguns segundos,
+        // mostra erro + botão de tentar de novo em vez de deixar o cliente
+        // travado no "Gerando seu PDF..." pra sempre.
+        let curriculoGeracaoTimeoutId = null;
         // Mesma ideia, pro PDF da carta de apresentação (só existe se o
         // cliente marcou o order bump).
         let cartaPdfDataUri = null;
@@ -6717,6 +6733,7 @@
             // gerarCV() é a versão redefinida mais abaixo (gerarEEnviarCV): gera o PDF
             // com o modelo certo (Básico/Premium, já com a logo) e envia por e-mail.
             gerarCV();
+            iniciarTimeoutCurriculo();
             if (cartaApresentacao) {
                 try {
                     cartaPdfDataUri = gerarCartaApresentacao(dados);
@@ -6760,10 +6777,9 @@
             const msgWpp = montarMsgWhatsapp();
             const linkWpp = `https://wa.me/${WPP}?text=${msgWpp}`;
             document.getElementById('btn-wpp-suc').href = linkWpp;
-            const wppWindow = window.open(linkWpp, '_blank');
-            if (!wppWindow) {
-                console.warn('Pop-up do WhatsApp bloqueado pelo navegador — cliente precisa clicar no botão manual.');
-            }
+            // Não abre o pop-up aqui — fica guardado e só é aberto quando o
+            // PDF terminar de gerar, ver revelarBotaoDownloadCurriculo().
+            linkWhatsappSucesso = linkWpp;
         }
 
         // ══ SISTEMA DE INDICAÇÃO — link pessoal na tela de sucesso ══
@@ -7197,11 +7213,14 @@
         // desaparece) pra o cliente poder baixar de novo se precisar, ou caso
         // o navegador tenha bloqueado o download automático.
         function revelarBotaoDownloadCurriculo() {
+            clearTimeout(curriculoGeracaoTimeoutId);
             const wrap = document.getElementById('curriculo-download-wrap');
             const loading = document.getElementById('curriculo-loading');
+            const erro = document.getElementById('curriculo-erro');
             const shareWrap = document.getElementById('curriculo-share-wrap');
             if (wrap) wrap.style.display = 'block';
             if (loading) loading.style.display = 'none';
+            if (erro) erro.style.display = 'none';
             // Só mostra o botão de compartilhar se o navegador suportar
             // compartilhar arquivo (Web Share API nível 2) — em navegadores sem
             // suporte (a maioria de desktop), o botão de baixar acima já resolve.
@@ -7209,6 +7228,46 @@
                 shareWrap.style.display = 'block';
             }
             baixarCurriculoPdf();
+            // Só agora, com o PDF pronto, abre o WhatsApp — abrir antes fazia a
+            // aba perder o foco e travar o html2canvas no meio da geração.
+            if (linkWhatsappSucesso) {
+                const link = linkWhatsappSucesso;
+                linkWhatsappSucesso = null;
+                const wppWindow = window.open(link, '_blank');
+                if (!wppWindow) {
+                    console.warn('Pop-up do WhatsApp bloqueado pelo navegador — cliente precisa clicar no botão manual.');
+                }
+            }
+        }
+
+        // Timer de segurança: se o PDF do currículo não ficar pronto dentro
+        // desse prazo (ex.: html2canvas travou por instabilidade do
+        // navegador/celular), mostra erro + botão de tentar de novo em vez de
+        // deixar o cliente preso no "Gerando seu PDF..." pra sempre.
+        const CURRICULO_GERACAO_TIMEOUT_MS = 20000;
+
+        function iniciarTimeoutCurriculo() {
+            clearTimeout(curriculoGeracaoTimeoutId);
+            curriculoGeracaoTimeoutId = setTimeout(() => {
+                if (!curriculoPdfDataUri) mostrarErroCurriculo();
+            }, CURRICULO_GERACAO_TIMEOUT_MS);
+        }
+
+        function mostrarErroCurriculo() {
+            clearTimeout(curriculoGeracaoTimeoutId);
+            const loading = document.getElementById('curriculo-loading');
+            const erro = document.getElementById('curriculo-erro');
+            if (loading) loading.style.display = 'none';
+            if (erro) erro.style.display = 'block';
+        }
+
+        function tentarGerarCurriculoNovamente() {
+            const loading = document.getElementById('curriculo-loading');
+            const erro = document.getElementById('curriculo-erro');
+            if (erro) erro.style.display = 'none';
+            if (loading) loading.style.display = 'block';
+            iniciarTimeoutCurriculo();
+            gerarEEnviarCV(dados);
         }
 
         // Entrega principal do currículo: o próprio cliente compartilha o PDF
@@ -7935,6 +7994,7 @@
             }).catch((err) => {
                 captureEl.remove();
                 console.error('❌ Erro ao gerar PDF:', err);
+                mostrarErroCurriculo();
             });
         }
 
