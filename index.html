@@ -5966,7 +5966,7 @@
                 <span class="share-rocket">🚀</span>
                 <h2 class="share-titulo">Falta só <span>mais um passo!</span></h2>
                 <p class="share-desc">
-                    Compartilhe o site com <strong style="color:var(--laranja2)">2 pessoas</strong> e ajude mais gente a
+                    Compartilhe o site no seu <strong style="color:var(--laranja2)">Status do WhatsApp</strong> e ajude mais gente a
                     conquistar um emprego com um currículo profissional.
                     Após concluir, seu pagamento será liberado automaticamente!
                 </p>
@@ -5978,7 +5978,7 @@
                 <!-- Progresso -->
                 <div class="share-progress-header">
                     <div class="share-progress-label">Compartilhamentos</div>
-                    <div class="share-progress-count"><span id="share-count">0</span> de 2 concluídos</div>
+                    <div class="share-progress-count"><span id="share-count">0</span> de 1 concluído</div>
                 </div>
                 <div class="share-bar-track">
                     <div class="share-bar-fill" id="share-bar"></div>
@@ -5987,24 +5987,14 @@
                 <!-- Itens de compartilhamento -->
                 <div class="share-itens">
 
-                    <!-- WhatsApp -->
+                    <!-- WhatsApp Status -->
                     <div class="share-item" id="share-wpp" onclick="compartilhar('wpp')">
                         <div class="share-item-icon" style="background:rgba(37,211,102,.15);">💬</div>
                         <div class="share-item-info">
-                            <div class="share-item-nome">WhatsApp</div>
-                            <div class="share-item-desc">Compartilhe com amigos e familiares</div>
+                            <div class="share-item-nome">Status do WhatsApp</div>
+                            <div class="share-item-desc">Poste no seu Status para seus contatos verem</div>
                         </div>
                         <div class="share-item-status" id="status-wpp">Compartilhar →</div>
-                    </div>
-
-                    <!-- Copiar link -->
-                    <div class="share-item" id="share-link" onclick="compartilhar('link')">
-                        <div class="share-item-icon" style="background:rgba(255,122,47,.15);">🔗</div>
-                        <div class="share-item-info">
-                            <div class="share-item-nome">Copiar link</div>
-                            <div class="share-item-desc">Cole em qualquer lugar que quiser</div>
-                        </div>
-                        <div class="share-item-status" id="status-link">Copiar →</div>
                     </div>
 
                 </div><!-- /share-itens -->
@@ -6023,7 +6013,7 @@
 
             </div><!-- /share-card -->
 
-            <!-- TELA DE CELEBRAÇÃO (aparece após 2 compartilhamentos) -->
+            <!-- TELA DE CELEBRAÇÃO (aparece após o compartilhamento) -->
             <div class="share-celebracao" id="share-celebracao">
                 <span class="celebracao-emoji">🎉</span>
                 <div class="celebracao-titulo">Muito obrigado!</div>
@@ -8446,14 +8436,13 @@
             const SITE_NOME = 'WCurrículos';
             const MSG_SHARE = encodeURIComponent(
                 '🚀 Precisa de um currículo profissional? Acabei de conhecer o WCurrículos! ' +
-                'Eles fazem currículos modernos em PDF e entregam direto no WhatsApp, a partir de R$9,90. ' +
+                'Peça seu currículo e receba em menos de 5min, direto no seu WhatsApp. ' +
                 'Acesse e solicite o seu: ' + SITE_URL
             );
 
             // Estado do compartilhamento
             let compartilhamentos = {
                 wpp: { feito: false, aguardando: false, timer: null },
-                link: { feito: false, aguardando: false, timer: null },
             };
             let totalCompartilhado = 0;
             let liberado = false;
@@ -8473,28 +8462,15 @@
                 // Abrir a rede social
                 const urls = {
                     wpp: `https://wa.me/?text=${MSG_SHARE}`,
-                    link: null,
                 };
 
-                if (tipo === 'link') {
-                    // Copiar link
-                    navigator.clipboard.writeText(SITE_URL).then(() => {
-                        const el = document.getElementById('share-link');
-                        const st = document.getElementById('status-link');
-                        el.classList.add('aguardando');
-                        st.textContent = '⏳ Aguardando... 8s';
-                        item.aguardando = true;
-                        mostrarTimer(tipo, 8);
-                    });
-                } else {
-                    window.open(urls[tipo], '_blank');
-                    const el = document.getElementById('share-' + tipo);
-                    const st = document.getElementById('status-' + tipo);
-                    el.classList.add('aguardando');
-                    st.textContent = '⏳ Aguardando... 10s';
-                    item.aguardando = true;
-                    mostrarTimer(tipo, 10);
-                }
+                window.open(urls[tipo], '_blank');
+                const el = document.getElementById('share-' + tipo);
+                const st = document.getElementById('status-' + tipo);
+                el.classList.add('aguardando');
+                st.textContent = '⏳ Aguardando... 10s';
+                item.aguardando = true;
+                mostrarTimer(tipo, 10);
             };
 
             // ── TIMER DE VALIDAÇÃO INTELIGENTE ──
@@ -8549,8 +8525,8 @@
                 // Atualizar barra de progresso
                 atualizarProgressoShare();
 
-                // Verificar se atingiu 2
-                if (totalCompartilhado >= 2 && !liberado) {
+                // Verificar se atingiu 1
+                if (totalCompartilhado >= 1 && !liberado) {
                     liberado = true;
                     setTimeout(mostrarCelebracao, 400);
                 }
@@ -8558,9 +8534,9 @@
 
             // ── ATUALIZAR PROGRESSO ──
             function atualizarProgressoShare() {
-                const pct = Math.min((totalCompartilhado / 2) * 100, 100);
+                const pct = Math.min((totalCompartilhado / 1) * 100, 100);
                 document.getElementById('share-bar').style.width = pct + '%';
-                document.getElementById('share-count').textContent = Math.min(totalCompartilhado, 2);
+                document.getElementById('share-count').textContent = Math.min(totalCompartilhado, 1);
 
                 // Gradiente da barra conforme progresso
                 if (pct < 50) {
