@@ -216,9 +216,12 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
         margin-bottom: 24px;
+    }
+    @media (min-width: 480px) {
+        .stats-grid { grid-template-columns: repeat(4, 1fr); }
     }
     .stat-box {
         background: var(--cinza);
@@ -229,7 +232,7 @@
     .stat-box .num {
         font-family: 'JetBrains Mono', monospace;
         font-weight: 700;
-        font-size: 1.3rem;
+        font-size: 1.15rem;
         color: var(--azul);
     }
     .stat-box .lbl { font-size: 0.72rem; color: var(--sub); margin-top: 4px; }
@@ -245,6 +248,100 @@
 
     footer { text-align: center; padding: 24px; color: var(--sub); font-size: 0.82rem; }
     footer a { color: var(--laranja); text-decoration: none; font-weight: 600; }
+
+    /* ══ Chave Pix ══ */
+    .pix-box {
+        background: var(--cinza);
+        border-radius: 14px;
+        padding: 16px 18px;
+        margin-bottom: 24px;
+    }
+    .pix-box-topo {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .pix-label { font-size: 0.78rem; color: var(--sub); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+    .pix-valor { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--azul); margin-top: 4px; word-break: break-all; }
+    .pix-valor.vazio { color: var(--sub); font-family: 'Inter', sans-serif; font-weight: 400; font-style: italic; }
+    .pix-editar-btn {
+        background: none;
+        border: none;
+        color: var(--laranja);
+        font-weight: 600;
+        font-size: 0.82rem;
+        cursor: pointer;
+        text-decoration: underline;
+        flex-shrink: 0;
+    }
+    .pix-form { display: none; margin-top: 14px; gap: 8px; }
+    .pix-form.show { display: flex; }
+    .pix-form input {
+        flex: 1;
+        margin-bottom: 0;
+        padding: 11px 14px;
+        font-size: 0.92rem;
+    }
+    .pix-form button {
+        border: none;
+        background: var(--azul);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0 18px;
+        border-radius: 10px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    /* ══ Saque ══ */
+    .saque-box {
+        border-radius: 16px;
+        padding: 22px;
+        margin-top: 24px;
+        text-align: center;
+    }
+    .saque-box.disponivel {
+        background: linear-gradient(135deg, rgba(255,122,47,.08), rgba(245,166,35,.08));
+        border: 1.5px solid var(--laranja2);
+    }
+    .saque-box.progresso { background: var(--cinza); }
+    .saque-box.solicitado { background: rgba(26,122,76,.08); border: 1.5px solid #1a7a4c; }
+    .saque-box h3 {
+        font-family: 'Sora', sans-serif;
+        font-size: 1.05rem;
+        color: var(--azul);
+        margin-bottom: 6px;
+    }
+    .saque-box p { color: var(--sub); font-size: 0.88rem; margin-bottom: 14px; }
+    .saque-progresso-barra {
+        background: var(--cinza2);
+        border-radius: 999px;
+        height: 10px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+    .saque-progresso-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--laranja2), var(--gold));
+        border-radius: 999px;
+        transition: width .4s ease;
+    }
+    .saque-progresso-label { font-size: 0.8rem; color: var(--sub); margin-bottom: 4px; }
+    .saque-btn {
+        border: none;
+        background: linear-gradient(135deg, var(--laranja2), var(--laranja));
+        color: #fff;
+        font-family: 'Sora', sans-serif;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 14px 28px;
+        border-radius: 12px;
+        cursor: pointer;
+    }
+    .saque-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .saque-solicitado-icone { font-size: 1.8rem; margin-bottom: 6px; }
 </style>
 </head>
 <body>
@@ -270,6 +367,9 @@
 
             <label for="cad-tel">Seu WhatsApp (com DDD)</label>
             <input type="tel" id="cad-tel" placeholder="Ex: 82988887777" autocomplete="tel" required>
+
+            <label for="cad-pix">Sua chave Pix <span style="font-weight:400;color:var(--sub)">(opcional agora, pode cadastrar depois)</span></label>
+            <input type="text" id="cad-pix" placeholder="CPF, e-mail, telefone ou chave aleatória" autocomplete="off">
 
             <div class="msg erro" id="cad-erro"></div>
 
@@ -312,10 +412,32 @@
                     <div class="lbl">Total gerado</div>
                 </div>
                 <div class="stat-box">
-                    <div class="num" id="st-comissao">R$ 0,00</div>
-                    <div class="lbl">Comissão acumulada</div>
+                    <div class="num" id="st-pendente">R$ 0,00</div>
+                    <div class="lbl">Comissão pendente</div>
+                </div>
+                <div class="stat-box">
+                    <div class="num" id="st-recebido">R$ 0,00</div>
+                    <div class="lbl">Já recebido</div>
                 </div>
             </div>
+
+            <div class="pix-box">
+                <div class="pix-box-topo">
+                    <div>
+                        <div class="pix-label">Chave Pix pra receber</div>
+                        <div class="pix-valor" id="pix-atual">—</div>
+                    </div>
+                    <button type="button" class="pix-editar-btn" onclick="alternarEdicaoPix()" id="pix-editar-btn">editar</button>
+                </div>
+                <div class="pix-form" id="pix-form">
+                    <input type="text" id="pix-input" placeholder="CPF, e-mail, telefone ou chave aleatória">
+                    <button type="button" onclick="salvarPix()" id="pix-salvar-btn">Salvar</button>
+                </div>
+                <div class="msg erro" id="pix-erro"></div>
+            </div>
+
+            <div id="saque-area"></div>
+
             <div id="painel-tabela"></div>
         </div>
     </div>
@@ -340,11 +462,15 @@
         }
     }
 
+    let telefoneAtual = null;
+    const SAQUE_MINIMO_CENTS = 2000;
+
     async function cadastrar(ev) {
         ev.preventDefault();
         setMsg('cad-erro', '');
         const nome = document.getElementById('cad-nome').value.trim();
         const telefone = apenasDigitos(document.getElementById('cad-tel').value);
+        const chavePix = document.getElementById('cad-pix').value.trim();
         if (telefone.length < 10 || telefone.length > 13) {
             setMsg('cad-erro', 'Informe um WhatsApp válido, com DDD.');
             return false;
@@ -356,7 +482,7 @@
             const resp = await fetch('/api/afiliado-cadastro', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome, telefone }),
+                body: JSON.stringify({ nome, telefone, chavePix }),
             });
             const data = await resp.json();
             if (!resp.ok) throw new Error(data.error || 'Erro ao cadastrar.');
@@ -403,35 +529,9 @@
         btn.disabled = true;
         btn.textContent = 'Buscando...';
         try {
-            const resp = await fetch(`/api/afiliado-dashboard?telefone=${telefone}`);
-            const data = await resp.json();
-            if (!resp.ok) throw new Error(data.error || 'Nenhum cadastro encontrado com esse WhatsApp.');
-
-            document.getElementById('st-indicacoes').textContent = data.indicacoes.length;
-            document.getElementById('st-vendas').textContent = formatarReais(data.totalVendasCents);
-            document.getElementById('st-comissao').textContent = formatarReais(data.totalComissaoCents);
-
-            const tabela = document.getElementById('painel-tabela');
-            if (data.indicacoes.length === 0) {
-                tabela.innerHTML = '<div class="vazio">Ainda sem indicações pagas. Compartilhe seu link para começar a ganhar!</div>';
-            } else {
-                const linhas = data.indicacoes.map((i) => {
-                    const dataFormatada = i.paidAt ? new Date(i.paidAt).toLocaleDateString('pt-BR') : '—';
-                    const status = i.comissaoPaga
-                        ? '<span class="status-pago">✓ Pago</span>'
-                        : '<span class="status-pendente">Pendente</span>';
-                    return `<tr>
-                        <td>${dataFormatada}</td>
-                        <td class="valor">${formatarReais(i.totalCents)}</td>
-                        <td class="valor">${formatarReais(i.comissaoCents)}</td>
-                        <td>${status}</td>
-                    </tr>`;
-                }).join('');
-                tabela.innerHTML = `<table>
-                    <thead><tr><th>Data</th><th>Venda</th><th>Sua comissão</th><th>Status</th></tr></thead>
-                    <tbody>${linhas}</tbody>
-                </table>`;
-            }
+            const data = await buscarDados(telefone);
+            telefoneAtual = telefone;
+            renderizarPainel(data);
             document.getElementById('painel-resultado').style.display = 'block';
         } catch (err) {
             setMsg('painel-erro', err.message || 'Não foi possível buscar agora. Tente de novo em instantes.');
@@ -441,6 +541,158 @@
             btn.textContent = '🔍 Ver meus ganhos';
         }
         return false;
+    }
+
+    async function buscarDados(telefone) {
+        const resp = await fetch(`/api/afiliado-dashboard?telefone=${telefone}`);
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || 'Nenhum cadastro encontrado com esse WhatsApp.');
+        return data;
+    }
+
+    function renderizarPainel(data) {
+        document.getElementById('st-indicacoes').textContent = data.indicacoes.length;
+        document.getElementById('st-vendas').textContent = formatarReais(data.totalVendasCents);
+        document.getElementById('st-pendente').textContent = formatarReais(data.totalPendenteCents);
+        document.getElementById('st-recebido').textContent = formatarReais(data.totalPagoCents);
+
+        const pixAtual = document.getElementById('pix-atual');
+        if (data.chavePix) {
+            pixAtual.textContent = data.chavePix;
+            pixAtual.classList.remove('vazio');
+        } else {
+            pixAtual.textContent = 'Nenhuma chave cadastrada ainda';
+            pixAtual.classList.add('vazio');
+        }
+
+        renderizarSaque(data);
+
+        const tabela = document.getElementById('painel-tabela');
+        if (data.indicacoes.length === 0) {
+            tabela.innerHTML = '<div class="vazio">Ainda sem indicações pagas. Compartilhe seu link para começar a ganhar!</div>';
+        } else {
+            const linhas = data.indicacoes.map((i) => {
+                const dataFormatada = i.paidAt ? new Date(i.paidAt).toLocaleDateString('pt-BR') : '—';
+                const status = i.comissaoPaga
+                    ? '<span class="status-pago">✓ Pago</span>'
+                    : '<span class="status-pendente">Pendente</span>';
+                return `<tr>
+                    <td>${dataFormatada}</td>
+                    <td class="valor">${formatarReais(i.totalCents)}</td>
+                    <td class="valor">${formatarReais(i.comissaoCents)}</td>
+                    <td>${status}</td>
+                </tr>`;
+            }).join('');
+            tabela.innerHTML = `<table>
+                <thead><tr><th>Data</th><th>Venda</th><th>Sua comissão</th><th>Status</th></tr></thead>
+                <tbody>${linhas}</tbody>
+            </table>`;
+        }
+    }
+
+    function renderizarSaque(data) {
+        const area = document.getElementById('saque-area');
+        const pendente = data.totalPendenteCents;
+
+        if (data.saqueSolicitadoEm) {
+            const dataSolicitacao = new Date(data.saqueSolicitadoEm).toLocaleDateString('pt-BR');
+            area.innerHTML = `
+                <div class="saque-box solicitado">
+                    <div class="saque-solicitado-icone">✅</div>
+                    <h3>Saque solicitado</h3>
+                    <p>Pedido feito em ${dataSolicitacao} — ${formatarReais(pendente)} a caminho via Pix. Assim que o pagamento for confirmado, o status muda pra "Pago" na tabela abaixo.</p>
+                </div>`;
+            return;
+        }
+
+        if (!data.chavePix) {
+            area.innerHTML = `
+                <div class="saque-box progresso">
+                    <h3>💸 Solicitar saque</h3>
+                    <p>Cadastre sua chave Pix acima pra poder solicitar o saque da sua comissão.</p>
+                </div>`;
+            return;
+        }
+
+        if (pendente < SAQUE_MINIMO_CENTS) {
+            const percentual = Math.min(100, Math.round((pendente / SAQUE_MINIMO_CENTS) * 100));
+            const falta = formatarReais(SAQUE_MINIMO_CENTS - pendente);
+            area.innerHTML = `
+                <div class="saque-box progresso">
+                    <h3>💸 Solicitar saque</h3>
+                    <div class="saque-progresso-label">${formatarReais(pendente)} de ${formatarReais(SAQUE_MINIMO_CENTS)} pro saque mínimo</div>
+                    <div class="saque-progresso-barra"><div class="saque-progresso-fill" style="width:${percentual}%"></div></div>
+                    <p>Faltam ${falta} em comissão pra você poder solicitar o saque.</p>
+                </div>`;
+            return;
+        }
+
+        area.innerHTML = `
+            <div class="saque-box disponivel">
+                <h3>💸 Você tem ${formatarReais(pendente)} disponíveis!</h3>
+                <p>Solicite o saque e o valor será transferido pra sua chave Pix em breve.</p>
+                <div class="msg erro" id="saque-erro"></div>
+                <button class="saque-btn" id="saque-btn" onclick="solicitarSaque()">Solicitar saque agora</button>
+            </div>`;
+    }
+
+    function alternarEdicaoPix() {
+        const form = document.getElementById('pix-form');
+        form.classList.toggle('show');
+        if (form.classList.contains('show')) {
+            document.getElementById('pix-input').focus();
+        }
+    }
+
+    async function salvarPix() {
+        setMsg('pix-erro', '');
+        const chavePix = document.getElementById('pix-input').value.trim();
+        if (!chavePix) {
+            setMsg('pix-erro', 'Digite uma chave Pix.');
+            return;
+        }
+        const btn = document.getElementById('pix-salvar-btn');
+        btn.disabled = true;
+        btn.textContent = 'Salvando...';
+        try {
+            const resp = await fetch('/api/afiliado-atualizar-pix', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telefone: telefoneAtual, chavePix }),
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || 'Não foi possível salvar agora.');
+            document.getElementById('pix-form').classList.remove('show');
+            document.getElementById('pix-input').value = '';
+            const dadosAtualizados = await buscarDados(telefoneAtual);
+            renderizarPainel(dadosAtualizados);
+        } catch (err) {
+            setMsg('pix-erro', err.message || 'Não foi possível salvar agora.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Salvar';
+        }
+    }
+
+    async function solicitarSaque() {
+        const btn = document.getElementById('saque-btn');
+        btn.disabled = true;
+        btn.textContent = 'Solicitando...';
+        try {
+            const resp = await fetch('/api/afiliado-solicitar-saque', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telefone: telefoneAtual }),
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || 'Não foi possível solicitar o saque agora.');
+            const dadosAtualizados = await buscarDados(telefoneAtual);
+            renderizarPainel(dadosAtualizados);
+        } catch (err) {
+            setMsg('saque-erro', err.message || 'Não foi possível solicitar o saque agora.');
+            btn.disabled = false;
+            btn.textContent = 'Solicitar saque agora';
+        }
     }
 </script>
 

@@ -73,23 +73,90 @@ async function verificarIndicacaoAnterior(telefone) {
   }
 }
 
-// Programa de afiliados: cadastro (nome+telefone) e consulta de ganhos,
-// mesmo padrão de proxy HTTP acima. Usado por api/afiliado-cadastro.js e
-// api/afiliado-dashboard.js.
-async function cadastrarAfiliado(telefone, nome) {
+// Programa de afiliados: cadastro (nome+telefone+chave Pix opcional) e
+// consulta de ganhos, mesmo padrão de proxy HTTP acima. Usado por
+// api/afiliado-cadastro.js e api/afiliado-dashboard.js.
+async function cadastrarAfiliado(telefone, nome, chavePix) {
   if (!BASE_URL || !SECRET) return { ok: false, error: 'Serviço de afiliados indisponível no momento.' };
   const { signal, cancel } = withTimeout(5000);
   try {
     const resp = await fetch(`${BASE_URL}/afiliado/cadastro`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SECRET}` },
-      body: JSON.stringify({ telefone, nome }),
+      body: JSON.stringify({ telefone, nome, chavePix }),
       signal,
     });
     if (!resp.ok) return { ok: false, error: 'Não foi possível concluir o cadastro agora.' };
     return { ok: true };
   } catch (err) {
     return { ok: false, error: 'Não foi possível concluir o cadastro agora.' };
+  } finally {
+    cancel();
+  }
+}
+
+// Edição posterior da chave Pix a partir do painel "meus ganhos".
+async function atualizarChavePix(telefone, chavePix) {
+  if (!BASE_URL || !SECRET) return { ok: false, error: 'Serviço de afiliados indisponível no momento.' };
+  const { signal, cancel } = withTimeout(5000);
+  try {
+    const resp = await fetch(`${BASE_URL}/afiliado/atualizar-pix`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SECRET}` },
+      body: JSON.stringify({ telefone, chavePix }),
+      signal,
+    });
+    if (resp.status === 404) return { ok: false, notFound: true, error: 'Cadastro de afiliado não encontrado.' };
+    if (!resp.ok) return { ok: false, error: 'Não foi possível atualizar a chave Pix agora.' };
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: 'Não foi possível atualizar a chave Pix agora.' };
+  } finally {
+    cancel();
+  }
+}
+
+// Solicitação de saque — o bot valida chave Pix cadastrada, saque mínimo e
+// se já não há outra solicitação em andamento, retornando a mensagem de erro
+// específica em caso de falha (por isso repassamos resp.json() mesmo em
+// respostas não-ok, diferente das outras funções deste arquivo).
+async function solicitarSaque(telefone) {
+  if (!BASE_URL || !SECRET) return { ok: false, error: 'Serviço de afiliados indisponível no momento.' };
+  const { signal, cancel } = withTimeout(5000);
+  try {
+    const resp = await fetch(`${BASE_URL}/afiliado/solicitar-saque`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SECRET}` },
+      body: JSON.stringify({ telefone }),
+      signal,
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) return { ok: false, error: data.error || 'Não foi possível solicitar o saque agora.' };
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: 'Não foi possível solicitar o saque agora.' };
+  } finally {
+    cancel();
+  }
+}
+
+// Painel admin: marca de uma vez todas as indicações pendentes de um
+// afiliado como pagas (dono transferiu o valor total do saque solicitado).
+async function marcarSaquePago(telefone) {
+  if (!BASE_URL || !SECRET) return { ok: false, error: 'Serviço de afiliados indisponível no momento.' };
+  const { signal, cancel } = withTimeout(5000);
+  try {
+    const resp = await fetch(`${BASE_URL}/afiliado/marcar-saque-pago`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SECRET}` },
+      body: JSON.stringify({ telefone }),
+      signal,
+    });
+    if (!resp.ok) return { ok: false, error: 'Não foi possível marcar o saque como pago agora.' };
+    const data = await resp.json().catch(() => ({}));
+    return { ok: true, quantidadeMarcada: data.quantidadeMarcada };
+  } catch (err) {
+    return { ok: false, error: 'Não foi possível marcar o saque como pago agora.' };
   } finally {
     cancel();
   }
@@ -155,6 +222,6 @@ async function marcarComissaoPaga(orderNsu) {
 
 module.exports = {
   salvarPedido, buscarPedido, verificarIndicacaoAnterior,
-  cadastrarAfiliado, buscarStatsAfiliado,
-  listarTodosAfiliados, marcarComissaoPaga,
+  cadastrarAfiliado, buscarStatsAfiliado, atualizarChavePix, solicitarSaque,
+  listarTodosAfiliados, marcarComissaoPaga, marcarSaquePago,
 };

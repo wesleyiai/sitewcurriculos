@@ -108,6 +108,7 @@
         margin-bottom: 18px;
     }
     .afiliado-card.tem-pendente { border-left: 4px solid var(--gold); }
+    .afiliado-card.tem-saque { border-left: 4px solid var(--laranja2); background: linear-gradient(135deg, rgba(255,122,47,.04), transparent 40%); }
     .afiliado-head {
         display: flex;
         justify-content: space-between;
@@ -118,12 +119,42 @@
     }
     .afiliado-nome { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.05rem; }
     .afiliado-tel { color: var(--sub); font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+    .afiliado-pix { color: var(--azul2); font-size: 0.82rem; margin-top: 4px; }
+    .afiliado-pix .lbl-pix { color: var(--sub); }
+    .afiliado-pix .sem-pix { color: var(--sub); font-style: italic; }
     .afiliado-totais { display: flex; gap: 18px; }
     .total-item { text-align: right; }
     .total-item .valor { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.05rem; }
     .total-item.pendente .valor { color: var(--gold); }
     .total-item.pago .valor { color: #1a7a4c; }
     .total-item .lbl { font-size: 0.7rem; color: var(--sub); }
+
+    .saque-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--laranja2);
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 5px 12px;
+        border-radius: 999px;
+        margin-bottom: 12px;
+    }
+
+    .acao-lote { margin-bottom: 14px; }
+    .btn-marcar-saque-pago {
+        background: linear-gradient(135deg, var(--laranja2), var(--laranja));
+        color: #fff;
+        border: none;
+        font-size: 0.82rem;
+        font-weight: 700;
+        padding: 9px 16px;
+        border-radius: 9px;
+        cursor: pointer;
+        font-family: 'Sora', sans-serif;
+    }
+    .btn-marcar-saque-pago:disabled { opacity: .5; cursor: not-allowed; }
 
     table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
     th, td { text-align: left; padding: 9px 6px; border-bottom: 1px solid var(--borda); }
@@ -206,7 +237,7 @@
                     <td>${i.nomeCliente || '—'}</td>
                     <td class="valor">${formatarReais(i.totalCents)}</td>
                     <td class="valor">${formatarReais(i.comissaoCents)}</td>
-                    <td><button class="btn-marcar-pago" data-order="${i.orderNsu}" onclick="marcarPago(this)">Marcar pago</button></td>
+                    <td><button class="btn-marcar-pago" data-order="${i.orderNsu}" onclick="marcarPago(this)">Pago</button></td>
                 </tr>
             `).join('');
             const linhasPagas = pagas.map((i) => `
@@ -224,12 +255,23 @@
                     <thead><tr><th>Data</th><th>Cliente</th><th>Venda</th><th>Comissão</th><th></th></tr></thead>
                     <tbody>${linhasPendentes}${linhasPagas}</tbody>
                    </table>`;
+            const pix = af.chavePix
+                ? `<span class="lbl-pix">Pix:</span> ${af.chavePix}`
+                : `<span class="sem-pix">Sem chave Pix cadastrada</span>`;
+            const badge = af.saqueSolicitadoEm
+                ? `<div class="saque-badge">🔔 Saque solicitado em ${new Date(af.saqueSolicitadoEm).toLocaleDateString('pt-BR')}</div>`
+                : '';
+            const acaoLote = pendentes.length > 0
+                ? `<div class="acao-lote"><button class="btn-marcar-saque-pago" data-tel="${af.telefone}" onclick="marcarSaquePago(this)">✓ Marcar tudo como pago (${pendentes.length})</button></div>`
+                : '';
             return `
-                <div class="afiliado-card ${af.totalPendenteCents > 0 ? 'tem-pendente' : ''}">
+                <div class="afiliado-card ${af.saqueSolicitadoEm ? 'tem-saque' : (af.totalPendenteCents > 0 ? 'tem-pendente' : '')}">
+                    ${badge}
                     <div class="afiliado-head">
                         <div>
                             <div class="afiliado-nome">${af.nome}</div>
                             <div class="afiliado-tel">${af.telefone}</div>
+                            <div class="afiliado-pix">${pix}</div>
                         </div>
                         <div class="afiliado-totais">
                             <div class="total-item pendente">
@@ -242,6 +284,7 @@
                             </div>
                         </div>
                     </div>
+                    ${acaoLote}
                     ${tabela}
                 </div>
             `;
@@ -286,8 +329,28 @@
             await carregar();
         } catch (err) {
             btn.disabled = false;
-            btn.textContent = 'Marcar pago';
+            btn.textContent = 'Pago';
             alert('Não foi possível marcar como pago agora. Tente de novo.');
+        }
+    }
+
+    async function marcarSaquePago(btn) {
+        const telefone = btn.dataset.tel;
+        const textoOriginal = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Marcando...';
+        try {
+            const resp = await fetch('/api/admin-afiliados-marcar-saque-pago', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-admin-senha': senhaSalva() },
+                body: JSON.stringify({ telefone }),
+            });
+            if (!resp.ok) throw new Error();
+            await carregar();
+        } catch (err) {
+            btn.disabled = false;
+            btn.textContent = textoOriginal;
+            alert('Não foi possível marcar o saque como pago agora. Tente de novo.');
         }
     }
 
