@@ -1309,6 +1309,31 @@
             }
         }
 
+        /* ══ MODO FOCO (checkout em tela cheia) ══
+           Ativado a partir da escolha do plano: esconde o resto da página
+           (topo, navbar, vitrine, depoimentos etc.) pra não dar a impressão
+           de que o cliente "voltou pro começo" ao rolar a tela pra cima —
+           só a etapa atual (ficha / compartilhar / pagamento / sucesso)
+           fica visível, do jeito que essas seções já controlam sozinhas. */
+        body.modo-foco .cta-afiliados-topo,
+        body.modo-foco nav,
+        body.modo-foco .hero,
+        body.modo-foco #vitrine,
+        body.modo-foco .speed-banner,
+        body.modo-foco .faixa-mot,
+        body.modo-foco .urgencia-bar,
+        body.modo-foco #como-funciona,
+        body.modo-foco #depoimentos,
+        body.modo-foco .garantia-bar,
+        body.modo-foco #exemplos,
+        body.modo-foco #planos,
+        body.modo-foco .ig-section,
+        body.modo-foco .stats-bar-section,
+        body.modo-foco #faq,
+        body.modo-foco footer {
+            display: none !important;
+        }
+
         /* ══ FORMULÁRIO ══ */
         #secao-formulario {
             display: none;
@@ -6602,6 +6627,7 @@
             const p = planos[t];
             document.getElementById('form-pl-nome').textContent = p.nome;
             document.getElementById('card-foto').style.display = p.temFoto ? 'block' : 'none';
+            document.body.classList.add('modo-foco');
             const s = document.getElementById('secao-formulario');
             s.style.display = 'block';
             setTimeout(() => s.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
@@ -6864,6 +6890,10 @@
                     console.error('Erro ao gerar checklist de entrevista:', e);
                 }
             }
+            document.body.classList.add('modo-foco');
+            document.getElementById('secao-formulario').style.display = 'none';
+            document.getElementById('secao-compartilhar').style.display = 'none';
+            document.getElementById('secao-pagamento').style.display = 'none';
             const s = document.getElementById('secao-sucesso');
             s.style.display = 'block';
             popularLinkIndicacao();
@@ -8544,6 +8574,7 @@
 
             // ── MOSTRAR TELA DE COMPARTILHAMENTO ──
             window.mostrarCompartilhamento = function () {
+                document.getElementById('secao-formulario').style.display = 'none';
                 const sec = document.getElementById('secao-compartilhar');
                 sec.style.display = 'block';
                 setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
@@ -9007,6 +9038,7 @@
                 atualizarValorExibicao();
             }
 
+            document.body.classList.add('modo-foco');
             document.getElementById('btn-confirmar').style.display = 'none';
             const sp = document.getElementById('secao-pagamento');
             sp.style.display = 'block';
@@ -9153,6 +9185,7 @@
             document.getElementById('pag-pix-chave').textContent = PIX_KEY;
             atualizarValorExibicao();
 
+            document.body.classList.add('modo-foco');
             document.getElementById('secao-pagamento').style.display = 'block';
             mostrarEntregaEmAndamento(entregarEm);
         }
