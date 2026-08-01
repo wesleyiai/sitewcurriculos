@@ -5151,6 +5151,18 @@
                 localStorage.setItem('cvw_ref_code', ref);
             }
         })();
+
+        // ══ PROGRAMA DE AFILIADOS — captura o ?aff= o quanto antes ══
+        // Mesmo mecanismo do ?ref= acima, mas trilha separada: aff dá
+        // comissão de 50% pro afiliado (não desconto pro comprador). Ver
+        // /afiliados.html e o campo `affCode` enviado a /api/create-link.
+        (function capturarAfiliado() {
+            const params = new URLSearchParams(window.location.search);
+            const aff = (params.get('aff') || '').replace(/\D/g, '');
+            if (aff.length >= 8 && aff.length <= 13) {
+                localStorage.setItem('cvw_aff_code', aff);
+            }
+        })();
     </script>
 
     <!-- ÍCONES SVG (sprite reutilizável, evita depender de emojis do SO) -->
@@ -6390,6 +6402,7 @@
                     <a href="#depoimentos">Depoimentos</a>
                     <a href="#planos">Planos e preços</a>
                     <a href="/curriculo/">Guias de currículo</a>
+                    <a href="/afiliados.html">💰 Seja Afiliado</a>
                     <a href="https://wa.me/5579991118177" target="_blank">Contato</a>
                 </div>
                 <div class="footer-links">
@@ -8849,6 +8862,7 @@
                 body: JSON.stringify({
                     plano, dados, cartaApresentacao, mensagemVagas, checklistEntrevista,
                     refCode: localStorage.getItem('cvw_ref_code') || null,
+                    affCode: localStorage.getItem('cvw_aff_code') || null,
                 }),
             })
                 .then((resp) => resp.json().then((data) => ({ ok: resp.ok, data })))

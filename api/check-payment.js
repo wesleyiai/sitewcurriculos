@@ -1,5 +1,11 @@
 const { salvarPedido, buscarPedido } = require('./_lib/pedidos');
 
+// Ver webhook-infinitepay.js — mesmo cálculo de comissão de afiliado,
+// necessário aqui também porque este endpoint é outro caminho que pode
+// marcar o pedido como pago (quando o cliente volta do checkout antes do
+// webhook da InfinitePay chegar).
+const COMISSAO_AFILIADO = 0.5;
+
 module.exports = async (req, res) => {
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Método não permitido' });
@@ -42,7 +48,15 @@ module.exports = async (req, res) => {
       pedido = await buscarPedido(order_nsu);
       if (pedido) {
         try {
-          await salvarPedido(order_nsu, { ...pedido, paid: true, paidAt: new Date().toISOString() });
+          const affCommissionCents = pedido.affCode
+            ? Math.round((pedido.totalCents || 0) * COMISSAO_AFILIADO)
+            : undefined;
+          await salvarPedido(order_nsu, {
+            ...pedido,
+            paid: true,
+            paidAt: pedido.paidAt || new Date().toISOString(),
+            ...(affCommissionCents !== undefined ? { affCommissionCents } : {}),
+          });
         } catch (err) {
           console.error('Falha ao atualizar pedido:', err);
         }

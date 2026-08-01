@@ -1,5 +1,10 @@
 const { salvarPedido, buscarPedido } = require('./_lib/pedidos');
 
+// Programa de afiliados: 50% do valor total pago, sobre tudo (plano +
+// order bumps) — diferente do desconto de indicação, que só incide sobre o
+// plano. Ver create-link.js para affCode/totalCents.
+const COMISSAO_AFILIADO = 0.5;
+
 // Registro paralelo dos pagamentos confirmados pela InfinitePay.
 // Não é usado para liberar o currículo na hora (isso é feito por
 // api/check-payment.js quando o cliente volta do checkout) — mas, como esse
@@ -20,7 +25,15 @@ module.exports = async (req, res) => {
     if (orderNsu) {
       const pedido = await buscarPedido(orderNsu);
       if (pedido && !pedido.paid) {
-        await salvarPedido(orderNsu, { ...pedido, paid: true, paidAt: new Date().toISOString() });
+        const affCommissionCents = pedido.affCode
+          ? Math.round((pedido.totalCents || 0) * COMISSAO_AFILIADO)
+          : undefined;
+        await salvarPedido(orderNsu, {
+          ...pedido,
+          paid: true,
+          paidAt: new Date().toISOString(),
+          ...(affCommissionCents !== undefined ? { affCommissionCents } : {}),
+        });
       }
       await notificarBotWcurriculos(orderNsu);
     }

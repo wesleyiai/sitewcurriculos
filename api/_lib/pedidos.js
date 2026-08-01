@@ -73,4 +73,43 @@ async function verificarIndicacaoAnterior(telefone) {
   }
 }
 
-module.exports = { salvarPedido, buscarPedido, verificarIndicacaoAnterior };
+// Programa de afiliados: cadastro (nome+telefone) e consulta de ganhos,
+// mesmo padrão de proxy HTTP acima. Usado por api/afiliado-cadastro.js e
+// api/afiliado-dashboard.js.
+async function cadastrarAfiliado(telefone, nome) {
+  if (!BASE_URL || !SECRET) return { ok: false, error: 'Serviço de afiliados indisponível no momento.' };
+  const { signal, cancel } = withTimeout(5000);
+  try {
+    const resp = await fetch(`${BASE_URL}/afiliado/cadastro`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SECRET}` },
+      body: JSON.stringify({ telefone, nome }),
+      signal,
+    });
+    if (!resp.ok) return { ok: false, error: 'Não foi possível concluir o cadastro agora.' };
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: 'Não foi possível concluir o cadastro agora.' };
+  } finally {
+    cancel();
+  }
+}
+
+async function buscarStatsAfiliado(telefone) {
+  if (!BASE_URL || !SECRET) return null;
+  const { signal, cancel } = withTimeout(5000);
+  try {
+    const resp = await fetch(`${BASE_URL}/afiliado/${encodeURIComponent(telefone)}`, {
+      headers: { Authorization: `Bearer ${SECRET}` },
+      signal,
+    });
+    if (!resp.ok) return null;
+    return await resp.json();
+  } catch (err) {
+    return null;
+  } finally {
+    cancel();
+  }
+}
+
+module.exports = { salvarPedido, buscarPedido, verificarIndicacaoAnterior, cadastrarAfiliado, buscarStatsAfiliado };

@@ -79,6 +79,17 @@ module.exports = async (req, res) => {
     items.push({ quantity: 1, price: CHECKLIST_ENTREVISTA.cents, description: CHECKLIST_ENTREVISTA.description });
   }
 
+  // Programa de afiliados: affCode é o telefone (só dígitos) de quem
+  // recrutou o cliente através do próprio link (?aff=<telefone>). Diferente
+  // do refCode acima (indicação entre clientes, 20% de desconto), este não
+  // dá desconto ao comprador — só gera comissão de 50% pro afiliado sobre o
+  // valor total pago, calculada no webhook quando o pagamento é confirmado
+  // (ver webhook-infinitepay.js). Autoindicação também é bloqueada aqui.
+  const affCodeBruto = req.body && req.body.affCode;
+  const affCode = apenasDigitos(affCodeBruto);
+  const affCodeValido = affCode.length >= 8 && affCode.length <= 13 && affCode !== telefoneComprador;
+  const totalCents = items.reduce((soma, i) => soma + i.price * i.quantity, 0);
+
   try {
     const ipRes = await fetch('https://api.checkout.infinitepay.io/links', {
       method: 'POST',
@@ -108,6 +119,8 @@ module.exports = async (req, res) => {
           plano, dados, cartaApresentacao, mensagemVagas, checklistEntrevista,
           paid: false,
           refCode: refCodeValido ? refCode : null,
+          affCode: affCodeValido ? affCode : null,
+          totalCents,
           createdAt: new Date().toISOString(),
         });
       } catch (err) {
