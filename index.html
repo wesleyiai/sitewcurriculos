@@ -5032,6 +5032,34 @@
                 font-size: 1.2rem;
             }
         }
+
+        /* ══ CTA AFILIADOS — banner no topo da página ══ */
+        .cta-afiliados-topo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: linear-gradient(90deg, var(--laranja2), var(--gold));
+            color: #fff;
+            text-decoration: none;
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: 0.92rem;
+            padding: 12px 16px;
+            text-align: center;
+            animation: cta-afiliados-pulso 2.4s ease-in-out infinite;
+        }
+        .cta-afiliados-topo:hover { filter: brightness(1.05); }
+        .cta-afiliados-topo .cta-seta { display: inline-block; transition: transform .2s; }
+        .cta-afiliados-topo:hover .cta-seta { transform: translateX(4px); }
+        @keyframes cta-afiliados-pulso {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 122, 47, .35); }
+            50% { box-shadow: 0 0 0 8px rgba(255, 122, 47, 0); }
+        }
+        @media (max-width: 480px) {
+            .cta-afiliados-topo { font-size: 0.8rem; padding: 10px 12px; }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="application/ld+json">
@@ -5266,6 +5294,11 @@
     <!-- CURSOR PERSONALIZADO -->
     <div class="cursor-dot" id="cursor-dot"></div>
     <div class="cursor-ring" id="cursor-ring"></div>
+
+    <!-- CTA AFILIADOS -->
+    <a href="/afiliados.html" class="cta-afiliados-topo">
+        💰 Ganhe <strong>R$30 a R$70 por dia</strong> indicando o WCurrículos — toque aqui <span class="cta-seta">→</span>
+    </a>
 
     <!-- NAVBAR -->
     <nav>
