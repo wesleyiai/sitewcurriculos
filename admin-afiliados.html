@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Comissões de Afiliados</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap');
+
+    :root {
+        --azul: #0D1F3C;
+        --azul2: #1A3A6B;
+        --laranja: #E8621A;
+        --laranja2: #FF7A2F;
+        --gold: #F5A623;
+        --cinza: #F0F4F9;
+        --cinza2: #E4ECF5;
+        --branco: #fff;
+        --texto: #0D1F3C;
+        --sub: #546E8A;
+        --borda: #D1DDE8;
+        --erro: #D6334C;
+        --sombra: 0 4px 24px rgba(13, 31, 60, .10);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--cinza); color: var(--texto); min-height: 100vh; }
+
+    header {
+        background: var(--azul);
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+    }
+    header span {
+        font-family: 'Sora', sans-serif;
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: #fff;
+    }
+    header span em { font-style: normal; color: var(--laranja2); }
+    header button {
+        background: rgba(255,255,255,.1);
+        border: 1px solid rgba(255,255,255,.2);
+        color: #fff;
+        font-size: 0.78rem;
+        padding: 6px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    main { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+
+    #tela-senha { max-width: 380px; margin: 60px auto; text-align: center; }
+    #tela-senha h1 { font-family: 'Sora', sans-serif; font-size: 1.3rem; margin-bottom: 8px; }
+    #tela-senha p { color: var(--sub); font-size: 0.9rem; margin-bottom: 20px; }
+    #tela-senha input {
+        width: 100%;
+        padding: 13px 16px;
+        border: 1.5px solid var(--borda);
+        border-radius: 12px;
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    #tela-senha button {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--laranja2), var(--laranja));
+        color: #fff;
+        font-family: 'Sora', sans-serif;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .msg-erro { color: var(--erro); font-size: 0.85rem; margin-bottom: 10px; display: none; }
+    .msg-erro.show { display: block; }
+
+    #tela-painel { display: none; }
+
+    .resumo-topo {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    .resumo-topo h1 { font-family: 'Sora', sans-serif; font-size: 1.4rem; }
+    .resumo-topo button {
+        background: var(--cinza2);
+        border: none;
+        color: var(--azul);
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .afiliado-card {
+        background: var(--branco);
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+        box-shadow: var(--sombra);
+        padding: 22px;
+        margin-bottom: 18px;
+    }
+    .afiliado-card.tem-pendente { border-left: 4px solid var(--gold); }
+    .afiliado-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+    .afiliado-nome { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.05rem; }
+    .afiliado-tel { color: var(--sub); font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+    .afiliado-totais { display: flex; gap: 18px; }
+    .total-item { text-align: right; }
+    .total-item .valor { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.05rem; }
+    .total-item.pendente .valor { color: var(--gold); }
+    .total-item.pago .valor { color: #1a7a4c; }
+    .total-item .lbl { font-size: 0.7rem; color: var(--sub); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th, td { text-align: left; padding: 9px 6px; border-bottom: 1px solid var(--borda); }
+    th { color: var(--sub); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; }
+    td.valor { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+    .status-pago { color: #1a7a4c; font-weight: 600; font-size: 0.82rem; }
+    .btn-marcar-pago {
+        background: var(--azul);
+        color: #fff;
+        border: none;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 7px;
+        cursor: pointer;
+    }
+    .btn-marcar-pago:disabled { opacity: .5; cursor: not-allowed; }
+
+    .vazio-geral { text-align: center; color: var(--sub); padding: 60px 0; }
+</style>
+</head>
+<body>
+
+<header>
+    <span>WCurrículos <em>💰 Admin Afiliados</em></span>
+</header>
+
+<main>
+    <div id="tela-senha">
+        <h1>Área restrita</h1>
+        <p>Digite a senha de administrador pra ver as comissões dos afiliados.</p>
+        <div class="msg-erro" id="senha-erro"></div>
+        <input type="password" id="input-senha" placeholder="Senha admin" autocomplete="off">
+        <button onclick="entrar()">Entrar</button>
+    </div>
+
+    <div id="tela-painel">
+        <div class="resumo-topo">
+            <h1>Comissões de afiliados</h1>
+            <button onclick="carregar()">↻ Atualizar</button>
+        </div>
+        <div id="lista-afiliados"></div>
+    </div>
+</main>
+
+<script>
+    const CHAVE_SENHA = 'wcv_admin_senha';
+
+    function formatarReais(cents) {
+        return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function senhaSalva() {
+        return localStorage.getItem(CHAVE_SENHA) || '';
+    }
+
+    async function entrar() {
+        const senha = document.getElementById('input-senha').value;
+        if (!senha) return;
+        localStorage.setItem(CHAVE_SENHA, senha);
+        const ok = await carregar();
+        if (ok) {
+            document.getElementById('tela-senha').style.display = 'none';
+            document.getElementById('tela-painel').style.display = 'block';
+        }
+    }
+
+    function renderizarAfiliados(afiliados) {
+        const lista = document.getElementById('lista-afiliados');
+        if (afiliados.length === 0) {
+            lista.innerHTML = '<div class="vazio-geral">Nenhum afiliado cadastrado ainda.</div>';
+            return;
+        }
+        lista.innerHTML = afiliados.map((af) => {
+            const pendentes = af.indicacoes.filter((i) => !i.comissaoPaga);
+            const pagas = af.indicacoes.filter((i) => i.comissaoPaga);
+            const linhasPendentes = pendentes.map((i) => `
+                <tr>
+                    <td>${new Date(i.paidAt).toLocaleDateString('pt-BR')}</td>
+                    <td>${i.nomeCliente || '—'}</td>
+                    <td class="valor">${formatarReais(i.totalCents)}</td>
+                    <td class="valor">${formatarReais(i.comissaoCents)}</td>
+                    <td><button class="btn-marcar-pago" data-order="${i.orderNsu}" onclick="marcarPago(this)">Marcar pago</button></td>
+                </tr>
+            `).join('');
+            const linhasPagas = pagas.map((i) => `
+                <tr>
+                    <td>${new Date(i.paidAt).toLocaleDateString('pt-BR')}</td>
+                    <td>${i.nomeCliente || '—'}</td>
+                    <td class="valor">${formatarReais(i.totalCents)}</td>
+                    <td class="valor">${formatarReais(i.comissaoCents)}</td>
+                    <td><span class="status-pago">✓ Pago</span></td>
+                </tr>
+            `).join('');
+            const tabela = (pendentes.length + pagas.length) === 0
+                ? ''
+                : `<table>
+                    <thead><tr><th>Data</th><th>Cliente</th><th>Venda</th><th>Comissão</th><th></th></tr></thead>
+                    <tbody>${linhasPendentes}${linhasPagas}</tbody>
+                   </table>`;
+            return `
+                <div class="afiliado-card ${af.totalPendenteCents > 0 ? 'tem-pendente' : ''}">
+                    <div class="afiliado-head">
+                        <div>
+                            <div class="afiliado-nome">${af.nome}</div>
+                            <div class="afiliado-tel">${af.telefone}</div>
+                        </div>
+                        <div class="afiliado-totais">
+                            <div class="total-item pendente">
+                                <div class="valor">${formatarReais(af.totalPendenteCents)}</div>
+                                <div class="lbl">Pendente</div>
+                            </div>
+                            <div class="total-item pago">
+                                <div class="valor">${formatarReais(af.totalPagoCents)}</div>
+                                <div class="lbl">Já pago</div>
+                            </div>
+                        </div>
+                    </div>
+                    ${tabela}
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function carregar() {
+        const senha = senhaSalva();
+        if (!senha) return false;
+        try {
+            const resp = await fetch('/api/admin-afiliados-listar', {
+                headers: { 'x-admin-senha': senha },
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+                document.getElementById('senha-erro').textContent = data.error || 'Senha incorreta.';
+                document.getElementById('senha-erro').classList.add('show');
+                localStorage.removeItem(CHAVE_SENHA);
+                return false;
+            }
+            document.getElementById('senha-erro').classList.remove('show');
+            renderizarAfiliados(data);
+            return true;
+        } catch (err) {
+            document.getElementById('senha-erro').textContent = 'Não foi possível carregar agora.';
+            document.getElementById('senha-erro').classList.add('show');
+            return false;
+        }
+    }
+
+    async function marcarPago(btn) {
+        const orderNsu = btn.dataset.order;
+        btn.disabled = true;
+        btn.textContent = 'Marcando...';
+        try {
+            const resp = await fetch('/api/admin-afiliados-marcar-pago', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-admin-senha': senhaSalva() },
+                body: JSON.stringify({ orderNsu }),
+            });
+            if (!resp.ok) throw new Error();
+            await carregar();
+        } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Marcar pago';
+            alert('Não foi possível marcar como pago agora. Tente de novo.');
+        }
+    }
+
+    (async function init() {
+        if (senhaSalva()) {
+            const ok = await carregar();
+            if (ok) {
+                document.getElementById('tela-senha').style.display = 'none';
+                document.getElementById('tela-painel').style.display = 'block';
+            }
+        }
+    })();
+</script>
+
+</body>
+</html>

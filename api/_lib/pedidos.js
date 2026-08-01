@@ -112,4 +112,49 @@ async function buscarStatsAfiliado(telefone) {
   }
 }
 
-module.exports = { salvarPedido, buscarPedido, verificarIndicacaoAnterior, cadastrarAfiliado, buscarStatsAfiliado };
+// Painel admin (admin-afiliados.html): lista todos os afiliados com
+// pendências e marca uma comissão específica como paga (dono já transferiu
+// via Pix manualmente). A senha admin é checada antes disso em
+// api/admin-afiliados-*.js — aqui é só o mesmo proxy autenticado pelo
+// Bearer secret do bot, igual todo o resto deste arquivo.
+async function listarTodosAfiliados() {
+  if (!BASE_URL || !SECRET) return null;
+  const { signal, cancel } = withTimeout(5000);
+  try {
+    const resp = await fetch(`${BASE_URL}/afiliados/todos`, {
+      headers: { Authorization: `Bearer ${SECRET}` },
+      signal,
+    });
+    if (!resp.ok) return null;
+    return await resp.json();
+  } catch (err) {
+    return null;
+  } finally {
+    cancel();
+  }
+}
+
+async function marcarComissaoPaga(orderNsu) {
+  if (!BASE_URL || !SECRET) return { ok: false, error: 'Serviço de afiliados indisponível no momento.' };
+  const { signal, cancel } = withTimeout(5000);
+  try {
+    const resp = await fetch(`${BASE_URL}/afiliado/marcar-pago`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SECRET}` },
+      body: JSON.stringify({ orderNsu }),
+      signal,
+    });
+    if (!resp.ok) return { ok: false, error: 'Não foi possível marcar como pago agora.' };
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: 'Não foi possível marcar como pago agora.' };
+  } finally {
+    cancel();
+  }
+}
+
+module.exports = {
+  salvarPedido, buscarPedido, verificarIndicacaoAnterior,
+  cadastrarAfiliado, buscarStatsAfiliado,
+  listarTodosAfiliados, marcarComissaoPaga,
+};
