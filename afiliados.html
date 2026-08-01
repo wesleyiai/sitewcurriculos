@@ -402,6 +402,15 @@
         </form>
 
         <div id="painel-resultado" style="display:none; margin-top:24px">
+            <div class="resultado-link show">
+                <div class="label">Seu link exclusivo:</div>
+                <div class="link-box">
+                    <code id="painel-link"></code>
+                    <button onclick="copiarLinkPainel()" id="painel-copiar-btn">Copiar</button>
+                </div>
+                <a href="#" target="_blank" class="share-wpp" id="painel-wpp-link">📲 Compartilhar no WhatsApp</a>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="num" id="st-indicacoes">0</div>
@@ -512,6 +521,16 @@
         });
     }
 
+    function copiarLinkPainel() {
+        const link = document.getElementById('painel-link').textContent;
+        navigator.clipboard.writeText(link).then(() => {
+            const btn = document.getElementById('painel-copiar-btn');
+            const original = btn.textContent;
+            btn.textContent = 'Copiado!';
+            setTimeout(() => { btn.textContent = original; }, 1800);
+        });
+    }
+
     function mostrarPainel() {
         document.getElementById('card-painel').style.display = 'block';
         document.getElementById('card-painel').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -551,6 +570,11 @@
     }
 
     function renderizarPainel(data) {
+        const link = `${window.location.origin}/?aff=${telefoneAtual}`;
+        document.getElementById('painel-link').textContent = link;
+        const textoWpp = encodeURIComponent(`Oi! Que tal fazer seu currículo profissional em minutos com o WCurrículos? ${link}`);
+        document.getElementById('painel-wpp-link').href = `https://wa.me/?text=${textoWpp}`;
+
         document.getElementById('st-indicacoes').textContent = data.indicacoes.length;
         document.getElementById('st-vendas').textContent = formatarReais(data.totalVendasCents);
         document.getElementById('st-pendente').textContent = formatarReais(data.totalPendenteCents);
